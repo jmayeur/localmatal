@@ -1,0 +1,30 @@
+# Copy this to .dev.vars for local development
+# Never commit .dev.vars to version control
+
+# Cloudflare Turnstile
+TURNSTILE_SECRET_KEY=your_turnstile_secret_key
+TURNSTILE_SITE_KEY=your_turnstile_site_key
+
+# Resend (email)
+RESEND_API_KEY=your_resend_api_key
+MAINTAINER_EMAIL=you@example.com
+
+# Workers AI model pins
+FACE_DETECTION_MODEL=@cf/microsoft/resnet-50
+NSFW_MODEL=@cf/llava-hf/llava-1.5-7b-hf
+OVERLAP_EMBEDDING_MODEL=@cf/baai/bge-small-en-v1.5
+OVERLAP_LLM_MODEL=@cf/meta/llama-3.1-8b-instruct
+
+# Concept overlap thresholds (override defaults in wrangler.toml)
+# OVERLAP_THRESHOLD=0.65
+# OVERLAP_LLM_THRESHOLD=0.50
+
+# Submissions
+# SUBMISSIONS_PAUSED=false
+# DIGEST_THRESHOLD=5
+
+# Image serving
+IMAGES_BASE_URL=https://images.localmatal.com
+
+# Daily salt for IP hashing (auto-rotates in production via Cron Trigger)
+IP_HASH_SALT=dev_salt_replace_in_production

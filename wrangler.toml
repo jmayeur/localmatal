@@ -1,0 +1,27 @@
+name = "localmatal"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "localmatal"
+database_id = "PLACEHOLDER_REPLACE_WITH_REAL_ID"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "localmatal-images"
+
+[[kv_namespaces]]
+binding = "CURRENT_PLACE_CACHE"
+id = "PLACEHOLDER_REPLACE_WITH_REAL_ID"
+
+[ai]
+binding = "AI"
+
+[vars]
+SUBMISSIONS_PAUSED = "false"
+OVERLAP_THRESHOLD = "0.65"
+OVERLAP_LLM_THRESHOLD = "0.50"
+DIGEST_THRESHOLD = "5"
+IMAGES_BASE_URL = "https://images.localmatal.com"
