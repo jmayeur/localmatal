@@ -21,6 +21,11 @@ dist/
 *.cert
 *.crt
 
+# BMAD tooling (framework files — not part of the shipped product)
+_bmad/
+.agents/
+.claude/
+
 # OS
 .DS_Store
 Thumbs.db
