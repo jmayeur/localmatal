@@ -8,11 +8,18 @@ dist/
 # Cloudflare
 .wrangler/
 .dev.vars
+.dev.vars.*
 
-# Environment
+# Environment & secrets
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.cert
+*.crt
 
 # OS
 .DS_Store
@@ -22,3 +29,4 @@ Thumbs.db
 .vscode/settings.json
 .idea/
 *.swp
+*.swo
