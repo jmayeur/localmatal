@@ -1,0 +1,77 @@
+---
+interface Props {
+  placeId: string;
+}
+const { placeId } = Astro.props;
+---
+
+<div class="report-link">
+  <button
+    type="button"
+    id={`report-toggle-${placeId}`}
+    aria-expanded="false"
+    aria-controls={`report-form-${placeId}`}
+  >
+    Report this place
+  </button>
+
+  <div
+    id={`report-form-${placeId}`}
+    class="report-form"
+    hidden
+  >
+    <form method="POST" action="/api/v1/reports" data-place-id={placeId}>
+      <div
+        id={`cf-turnstile-${placeId}`}
+        class="cf-turnstile"
+        data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '1x00000000000000000000AA'}
+      />
+      <label for={`report-reason-${placeId}`} class="sr-only">Reason (optional)</label>
+      <textarea
+        id={`report-reason-${placeId}`}
+        name="reason"
+        placeholder="Reason (optional)"
+        maxlength="500"
+        aria-label="Reason for report (optional)"
+      />
+      <input type="hidden" name="placeId" value={placeId} />
+      <button type="submit">Submit report</button>
+    </form>
+    <div aria-live="polite" class="sr-only" id={`report-status-${placeId}`} />
+  </div>
+</div>
+
+<script>
+  // Toggle the report form
+  document.querySelectorAll<HTMLButtonElement>('[id^="report-toggle-"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      const formEl = document.getElementById(btn.getAttribute('aria-controls')!);
+      if (formEl) formEl.hidden = expanded;
+    });
+  });
+
+  // AJAX submit for report forms
+  document.querySelectorAll<HTMLFormElement>('form[data-place-id]').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const placeId = form.dataset.placeId!;
+      const statusEl = document.getElementById(`report-status-${placeId}`);
+      const data = new FormData(form);
+
+      try {
+        const res = await fetch('/api/v1/reports', { method: 'POST', body: data });
+        if (res.ok) {
+          form.closest('.report-form')!.innerHTML =
+            '<p>Thank you. Your report has been submitted.</p>';
+          if (statusEl) statusEl.textContent = 'Report submitted successfully.';
+        } else {
+          if (statusEl) statusEl.textContent = 'Could not submit report. Please try again.';
+        }
+      } catch {
+        if (statusEl) statusEl.textContent = 'Could not submit report. Please try again.';
+      }
+    });
+  });
+</script>

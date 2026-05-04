@@ -1,17 +1,23 @@
 /// <reference path="../.astro/types.d.ts" />
 /// <reference types="@cloudflare/workers-types" />
 
-type Runtime = import('@astrojs/cloudflare').Runtime<Env>;
+// In @astrojs/cloudflare v13 / Astro v6, bindings are accessed via
+// `import { env } from 'cloudflare:workers'` — not Astro.locals.runtime.env.
+// Astro.locals.cfContext provides the ExecutionContext.
 
 declare namespace App {
-  interface Locals extends Runtime {}
+  interface Locals {
+    cfContext: ExecutionContext;
+  }
 }
 
+// Global env shape used by cloudflare:workers and Hono
 interface Env {
   DB: D1Database;
   MEDIA: R2Bucket;
   CURRENT_PLACE_CACHE: KVNamespace;
   AI: Ai;
+  ASSETS: Fetcher;
 
   TURNSTILE_SECRET_KEY: string;
   TURNSTILE_SITE_KEY: string;

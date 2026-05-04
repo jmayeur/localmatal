@@ -1,13 +1,79 @@
 ---
-// Placeholder — replaced in Epic 2
+export const prerender = false;
+
+import { env } from 'cloudflare:workers';
+import Base from '../layouts/Base.astro';
+import MapIsland from '../components/MapIsland';
+import ReportLink from '../components/ReportLink.astro';
+import { getCurrentPlace, setCurrentPlace } from '../lib/kv';
+import { getCurrentPlaceFromDb } from '../lib/db';
+import { getImageUrl, buildR2Key } from '../lib/r2';
+
+// KV cache with D1 fallback
+let place = await getCurrentPlace(env.CURRENT_PLACE_CACHE);
+if (!place) {
+  const dbPlace = await getCurrentPlaceFromDb(env.DB);
+  if (dbPlace && dbPlace.r2_key_prefix) {
+    place = {
+      id: dbPlace.id,
+      place_name: dbPlace.place_name,
+      contributor_name: dbPlace.contributor_name,
+      sentence: dbPlace.sentence,
+      lat: dbPlace.lat,
+      lng: dbPlace.lng,
+      r2_key_prefix: dbPlace.r2_key_prefix,
+      thumb_width: dbPlace.thumb_width,
+      thumb_height: dbPlace.thumb_height,
+      approved_at: dbPlace.approved_at,
+    };
+    await setCurrentPlace(env.CURRENT_PLACE_CACHE, place);
+  }
+}
+
+const modalUrl = place?.r2_key_prefix
+  ? getImageUrl(env, buildR2Key('approved', place.id, 'modal', 'webp'))
+  : null;
+const thumbUrl = place?.r2_key_prefix
+  ? getImageUrl(env, buildR2Key('approved', place.id, 'thumb', 'webp'))
+  : null;
+
+const siteUrl = 'https://localmatal.com';
+const ogUrl = place ? `${siteUrl}/place/${place.id}` : siteUrl;
 ---
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>localmatal</title>
-  </head>
-  <body>
-    <p>Coming soon.</p>
-  </body>
-</html>
+
+<Base
+  title={place ? `${place.place_name} — LocalMatal` : 'LocalMatal'}
+  description={place?.sentence}
+  ogImage={thumbUrl ?? undefined}
+  ogUrl={ogUrl}
+>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <main id="main" class="page">
+    {place ? (
+      <article>
+        {modalUrl && (
+          <img
+            src={modalUrl}
+            alt={place.sentence}
+            width={place.thumb_width ?? undefined}
+            height={place.thumb_height ?? undefined}
+            class="place-photo"
+            loading="eager"
+          />
+        )}
+        <h1 class="place-name">{place.place_name}</h1>
+        <p class="place-sentence">"{place.sentence}"</p>
+        <p class="place-contributor">— {place.contributor_name}</p>
+        <MapIsland mode="display" lat={place.lat} lng={place.lng} fuzzed={true} client:visible />
+        <ReportLink placeId={place.id} />
+      </article>
+    ) : (
+      <p>The chain is getting started. Check back soon.</p>
+    )}
+
+    <p class="chain-prompt">
+      Add the next place. Your sentence has to share at least one feeling, image, or idea with this one.
+    </p>
+    <a href="/submit" class="cta-link">Add a place →</a>
+  </main>
+</Base>

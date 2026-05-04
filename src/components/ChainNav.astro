@@ -1,0 +1,17 @@
+---
+interface Props {
+  prevId: string | null;
+  nextId: string | null;
+}
+const { prevId, nextId } = Astro.props;
+---
+{(prevId || nextId) && (
+  <nav class="chain-nav" aria-label="Chain navigation">
+    {prevId
+      ? <a href={`/place/${prevId}`}>← previous place</a>
+      : <span />}
+    {nextId
+      ? <a href={`/place/${nextId}`}>next place →</a>
+      : <span />}
+  </nav>
+)}
