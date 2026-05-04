@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /pending/
+
+Sitemap: https://localmatal.com/sitemap.xml

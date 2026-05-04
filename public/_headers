@@ -1,0 +1,13 @@
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Content-Security-Policy: default-src 'self'; img-src 'self' images.localmatal.com data: blob:; connect-src 'self' challenges.cloudflare.com; frame-src challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; script-src 'self' https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'
+
+/api/*
+  Cache-Control: no-store
+
+/admin/*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow

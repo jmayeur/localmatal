@@ -26,3 +26,31 @@ OVERLAP_THRESHOLD = "0.65"
 OVERLAP_LLM_THRESHOLD = "0.50"
 DIGEST_THRESHOLD = "5"
 IMAGES_BASE_URL = "https://images.localmatal.com"
+
+# ── Preview environment (isolated DB + bucket) ──────────────────────────────
+[env.preview]
+name = "localmatal-preview"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "localmatal-preview"
+database_id = "PLACEHOLDER_PREVIEW_DB_ID"
+migrations_dir = "migrations"
+
+[[env.preview.r2_buckets]]
+binding = "MEDIA"
+bucket_name = "localmatal-images-preview"
+
+[[env.preview.kv_namespaces]]
+binding = "CURRENT_PLACE_CACHE"
+id = "PLACEHOLDER_PREVIEW_KV_ID"
+
+[env.preview.ai]
+binding = "AI"
+
+[env.preview.vars]
+SUBMISSIONS_PAUSED = "false"
+OVERLAP_THRESHOLD = "0.65"
+OVERLAP_LLM_THRESHOLD = "0.50"
+DIGEST_THRESHOLD = "5"
+IMAGES_BASE_URL = "https://images-preview.localmatal.com"
