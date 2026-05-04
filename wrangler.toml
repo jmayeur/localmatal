@@ -3,6 +3,23 @@ compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "./dist"
 
+# ── Backup Worker (separate deployment from Pages) ───────────────────────────
+[env.backup]
+name = "localmatal-backup"
+main = "workers/backup.ts"
+
+[env.backup.triggers]
+crons = ["0 3 * * *"]
+
+[[env.backup.d1_databases]]
+binding = "DB"
+database_name = "localmatal"
+database_id = "PLACEHOLDER_REPLACE_WITH_REAL_ID"
+
+[[env.backup.r2_buckets]]
+binding = "MEDIA"
+bucket_name = "localmatal-images"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "localmatal"
