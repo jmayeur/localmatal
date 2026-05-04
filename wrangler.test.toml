@@ -1,0 +1,19 @@
+# Used by vitest-pool-workers only — omits AI binding (requires remote Workers AI)
+name = "localmatal-test"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+main = "src/lib/_test-entry.ts"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "localmatal-test"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[[kv_namespaces]]
+binding = "CURRENT_PLACE_CACHE"
+id = "00000000-0000-0000-0000-000000000001"
+
+[vars]
+IMAGES_BASE_URL = "https://images.localmatal.com"
+IP_HASH_SALT = "test_salt"
