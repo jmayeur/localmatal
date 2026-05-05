@@ -41,4 +41,5 @@ interface Env {
   DIGEST_THRESHOLD: string;
   IMAGES_BASE_URL: string;
   IP_HASH_SALT: string;
+  ADMIN_SECRET: string;
 }

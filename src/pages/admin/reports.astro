@@ -1,8 +1,27 @@
 ---
 export const prerender = false;
-import { env } from 'cloudflare:workers';
+import { env as _env } from 'cloudflare:workers';
 import BaseLayout from '../../layouts/Base.astro';
 import { getUnresolvedReports, getPlaceById } from '../../lib/db';
+
+const env = _env as unknown as Env;
+
+function checkAuth(request: Request): boolean {
+  const auth = request.headers.get('Authorization') ?? '';
+  if (!auth.startsWith('Basic ')) return false;
+  try {
+    const decoded = atob(auth.slice(6));
+    const password = decoded.split(':').slice(1).join(':');
+    return password === env.ADMIN_SECRET;
+  } catch { return false; }
+}
+
+if (!checkAuth(Astro.request)) {
+  return new Response('Unauthorized', {
+    status: 401,
+    headers: { 'WWW-Authenticate': 'Basic realm="LocalMatal Admin"' },
+  });
+}
 
 const actor = Astro.request.headers.get('CF-Access-Authenticated-User-Email') ?? 'maintainer';
 const rawReports = await getUnresolvedReports(env.DB);

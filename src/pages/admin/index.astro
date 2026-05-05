@@ -1,19 +1,41 @@
 ---
 export const prerender = false;
-import { env } from 'cloudflare:workers';
+import { env as _env } from 'cloudflare:workers';
 import BaseLayout from '../../layouts/Base.astro';
 import { getPendingSubmissions } from '../../lib/db';
-import { getImageUrl } from '../../lib/r2';
+
+const env = _env as unknown as Env;
+
+// HTTP Basic Auth
+function checkAuth(request: Request): boolean {
+  const auth = request.headers.get('Authorization') ?? '';
+  if (!auth.startsWith('Basic ')) return false;
+  try {
+    const decoded = atob(auth.slice(6));
+    const password = decoded.split(':').slice(1).join(':');
+    return password === env.ADMIN_SECRET;
+  } catch { return false; }
+}
+
+if (!checkAuth(Astro.request)) {
+  return new Response('Unauthorized', {
+    status: 401,
+    headers: { 'WWW-Authenticate': 'Basic realm="LocalMatal Admin"' },
+  });
+}
 
 const actor = Astro.request.headers.get('CF-Access-Authenticated-User-Email') ?? 'maintainer';
 const subs = await getPendingSubmissions(env.DB);
 const paused = env.SUBMISSIONS_PAUSED === 'true';
 
+function proxyUrl(r2Key: string) {
+  return `/api/v1/admin/image/${r2Key}`;
+}
+
 const items = subs.map((s) => ({
   ...s,
-  thumbUrl: s.r2_key_prefix
-    ? getImageUrl(env, `${s.r2_key_prefix}/thumb.webp`)
-    : null,
+  thumbUrl:  s.r2_key_prefix ? proxyUrl(`${s.r2_key_prefix}/thumb.jpeg`)  : null,
+  fullUrl:   s.r2_key_prefix ? proxyUrl(`${s.r2_key_prefix}/full.jpeg`)   : null,
 }));
 
 const REJECTION_REASONS = [
@@ -32,9 +54,11 @@ const REJECTION_REASONS = [
     h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
     .meta { color: #666; font-size: 0.85rem; margin-bottom: 1.5rem; }
     .paused-banner { background: #fef3cd; border: 1px solid #d4a017; padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1.5rem; }
-    .queue-card { border: 1px solid #ddd; border-radius: 6px; margin-bottom: 1.5rem; padding: 1rem; display: grid; grid-template-columns: 120px 1fr; gap: 1rem; }
-    .queue-card img { width: 120px; height: 90px; object-fit: cover; border-radius: 4px; }
-    .queue-card .no-thumb { width: 120px; height: 90px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.75rem; color: #888; }
+    .queue-card { border: 1px solid #ddd; border-radius: 6px; margin-bottom: 1.5rem; padding: 1rem; display: grid; grid-template-columns: 140px 1fr; gap: 1rem; }
+    .thumb-wrap { position: relative; width: 140px; }
+    .thumb-wrap img { width: 140px; height: 105px; object-fit: cover; border-radius: 4px; display: block; }
+    .thumb-wrap a.full-link { display: block; margin-top: 0.3rem; font-size: 0.75rem; text-align: center; }
+    .no-thumb { width: 140px; height: 105px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.75rem; color: #888; }
     .field { margin-bottom: 0.4rem; }
     .field label { font-size: 0.75rem; color: #666; display: block; }
     .scores { display: flex; gap: 1rem; margin: 0.5rem 0; font-size: 0.8rem; }
@@ -69,13 +93,8 @@ const REJECTION_REASONS = [
 
     {paused && (
       <div class="paused-banner">
-        ⏸ Submissions are currently <strong>paused</strong>. Toggle <code>SUBMISSIONS_PAUSED</code> in Cloudflare Pages env to resume.
+        ⏸ Submissions are currently <strong>paused</strong>. Set <code>SUBMISSIONS_PAUSED = false</code> to resume.
       </div>
-    )}
-    {!paused && (
-      <p class="meta" style="margin-top:-0.5rem">
-        To pause submissions: set <code>SUBMISSIONS_PAUSED = true</code> in Cloudflare Pages dashboard &gt; Settings &gt; Environment Variables.
-      </p>
     )}
 
     <!-- Seed form -->
@@ -99,9 +118,12 @@ const REJECTION_REASONS = [
       ? <p class="empty">Queue is clear.</p>
       : items.map((s) => (
         <article class="queue-card" id={`card-${s.id}`}>
-          <div>
+          <div class="thumb-wrap">
             {s.thumbUrl
-              ? <img src={s.thumbUrl} alt={s.sentence} width={s.thumb_width ?? 120} height={s.thumb_height ?? 90} loading="lazy" />
+              ? <>
+                  <img src={s.thumbUrl} alt={s.sentence} loading="lazy" />
+                  {s.fullUrl && <a class="full-link" href={s.fullUrl} target="_blank" rel="noopener">View full image ↗</a>}
+                </>
               : <div class="no-thumb">No image</div>}
           </div>
           <div>
@@ -181,12 +203,8 @@ const REJECTION_REASONS = [
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ place_name, contributor_name, sentence }),
       });
-      if (r.ok) {
-        alert('Saved. Refresh to see updated values.');
-        toggleEdit(id);
-      } else {
-        alert('Save failed: ' + (await r.json()).error?.message);
-      }
+      if (r.ok) { alert('Saved. Refresh to see updated values.'); toggleEdit(id); }
+      else { alert('Save failed: ' + (await r.json()).error?.message); }
     }
 
     async function seedChain() {
@@ -209,13 +227,10 @@ const REJECTION_REASONS = [
       fd.append('lng', lng);
       document.getElementById('seed-status').textContent = 'Seeding…';
       const r = await fetch('/api/v1/admin/seed', { method: 'POST', body: fd });
-      if (r.ok) {
-        const j = await r.json();
-        document.getElementById('seed-status').textContent = `Seeded! Place ID: ${j.id}`;
-      } else {
-        const j = await r.json();
-        document.getElementById('seed-status').textContent = `Error: ${j.error?.message}`;
-      }
+      const j = await r.json();
+      document.getElementById('seed-status').textContent = r.ok
+        ? `Seeded! Place ID: ${j.id}`
+        : `Error: ${j.error?.message}`;
     }
   </script>
 </BaseLayout>
