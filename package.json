@@ -11,10 +11,10 @@
     "lint": "eslint src/",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
-    "deploy": "wrangler pages deploy dist"
+    "deploy": "cd dist/server && wrangler deploy"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "13.3.0",
+    "@astrojs/cloudflare": "^13.3.1",
     "@astrojs/preact": "^5.1.2",
     "@hono/zod-validator": "^0.4.1",
     "astro": "6.2.1",

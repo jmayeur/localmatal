@@ -1,9 +1,8 @@
 name = "localmatal"
 compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = "./dist"
 
-# ── Backup Worker (separate deployment from Pages) ───────────────────────────
+# ── Backup Worker (separate deployment) ─────────────────────────────────────
 [env.backup]
 name = "localmatal-backup"
 main = "workers/backup.ts"
