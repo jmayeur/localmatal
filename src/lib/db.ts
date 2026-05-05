@@ -257,7 +257,7 @@ export async function upsertRateLimit(
   ipHash: string,
   windowKey: string,
 ): Promise<number> {
-  const result = await db
+  await db
     .prepare(
       `INSERT INTO rate_limits (ip_hash, window_key, count, last_seen)
        VALUES (?, ?, 1, ?)

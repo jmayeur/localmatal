@@ -66,6 +66,7 @@ const reports = await Promise.all(
   </main>
 
   <script is:inline>
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     async function resolve(id, action) {
       const confirmed = action === 'tombstoned'
         ? confirm('This will permanently tombstone the place and delete its images. Continue?')

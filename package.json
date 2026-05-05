@@ -11,7 +11,7 @@
     "lint": "eslint src/",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy --config dist/server/wrangler.json"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.3.1",

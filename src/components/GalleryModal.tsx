@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'preact/hooks';
-import type { Signal } from '@preact/signals';
+import type { Signal } from '@preact/signals'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { signal } from '@preact/signals';
 import MapIsland from './MapIsland';
 
