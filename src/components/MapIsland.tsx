@@ -17,9 +17,16 @@ interface SearchResult {
 }
 
 function getDistanceUnit(): 'km' | 'mi' {
+  const IMPERIAL = new Set(['US', 'LR', 'MM']);
   try {
-    const locale = new Intl.Locale(navigator.language).maximize();
-    if (['US', 'LR', 'MM'].includes(locale.region ?? '')) return 'mi';
+    // navigator.languages often contains explicit region tags (e.g. 'en-US')
+    for (const lang of Array.from(navigator.languages ?? [navigator.language])) {
+      const region = new Intl.Locale(lang).region;
+      if (region) return IMPERIAL.has(region) ? 'mi' : 'km';
+    }
+    // Fall back to likely-subtag expansion on the base language
+    const region = new Intl.Locale(navigator.language).maximize().region;
+    if (region) return IMPERIAL.has(region) ? 'mi' : 'km';
   } catch { /* ignore */ }
   return 'km';
 }
@@ -66,9 +73,11 @@ export default function MapIsland({ mode, lat, lng, fuzzed = false, onChange }: 
     import('leaflet').then((L) => {
       import('leaflet/dist/leaflet.css');
 
+      const isDefaultCenter = lat === 20 && lng === 0;
+
       const map = L.map(containerRef.current!, {
         center: [lat, lng],
-        zoom: 13,
+        zoom: isDefaultCenter ? 4 : 13,
         zoomControl: mode === 'picker',
         dragging: mode === 'picker',
         scrollWheelZoom: mode === 'picker',
@@ -116,8 +125,20 @@ export default function MapIsland({ mode, lat, lng, fuzzed = false, onChange }: 
         });
       }
 
-      mapRef.current  = map;
+      mapRef.current    = map;
       markerRef.current = marker;
+
+      // If no location was pre-filled (EXIF or previous input), pan to IP geolocation
+      if (mode === 'picker' && isDefaultCenter) {
+        fetch('/api/v1/geo')
+          .then(r => r.ok ? r.json<{ lat: number | null; lng: number | null }>() : null)
+          .then(data => {
+            if (data?.lat != null && data?.lng != null && mapRef.current) {
+              mapRef.current.setView([data.lat, data.lng], 10);
+            }
+          })
+          .catch(() => {});
+      }
     });
 
     return () => {

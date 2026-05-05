@@ -13,7 +13,7 @@ import BaseLayout from '../layouts/Base.astro';
     <ul>
       <li><strong>Photos</strong> — uploaded images are processed server-side before storage. EXIF metadata (including GPS coordinates embedded in the file) is stripped before the image is saved.</li>
       <li><strong>Location</strong> — when you submit a place, you provide approximate coordinates. We store a <em>fuzzed</em> version (offset by at least 100 metres in a random direction). Your precise location is never written to our database.</li>
-      <li><strong>IP address</strong> — your IP is hashed (SHA-256 with a rotating daily salt) for rate-limiting purposes. The raw IP is never stored. The hash cannot be reversed to identify you.</li>
+      <li><strong>IP address</strong> — your IP is hashed (SHA-256 with a rotating daily salt) for rate-limiting purposes. The raw IP is never stored. The hash cannot be reversed to identify you. On the submission form, city-level IP geolocation (provided by Cloudflare, accurate to roughly 10–50 km) is used solely to pre-centre the map picker; it is never stored or logged.</li>
       <li><strong>Submission text</strong> — place name, contributor name, and your description are stored as submitted after moderation approval.</li>
     </ul>
 
