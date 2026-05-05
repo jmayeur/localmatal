@@ -20,10 +20,10 @@ const successor = allPlaces.find((p) => p.prev_place_id === id && !p.is_tombston
 
 const origin = Astro.url.origin;
 const modalUrl = place.r2_key_prefix && !place.is_tombstoned
-  ? getImageUrl(env, buildR2Key('approved', place.id, 'modal', 'webp'), origin)
+  ? getImageUrl(env, buildR2Key('approved', place.id, 'modal', 'jpeg'), origin)
   : null;
 const thumbUrl = place.r2_key_prefix && !place.is_tombstoned
-  ? getImageUrl(env, buildR2Key('approved', place.id, 'thumb', 'webp'), origin)
+  ? getImageUrl(env, buildR2Key('approved', place.id, 'thumb', 'jpeg'), origin)
   : null;
 
 const siteUrl = origin;
