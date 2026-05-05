@@ -42,16 +42,10 @@ const turnstileSiteKey = env.TURNSTILE_SITE_KEY;
           By submitting you agree to the <a href="/terms">Terms of Service</a> and acknowledge our <a href="/privacy">Privacy Policy</a>.
         </p>
 
-        {/* Cloudflare Turnstile — loads after JS */}
+        {/* Cloudflare Turnstile — SubmissionForm renders the widget on step 4 */}
         <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
         <script is:inline define:vars={{ turnstileSiteKey }}>
           window.__turnstileSiteKey = turnstileSiteKey;
-          document.addEventListener('DOMContentLoaded', () => {
-            const el = document.getElementById('turnstile-widget');
-            if (el && window.turnstile) {
-              window.turnstile.render(el, { sitekey: window.__turnstileSiteKey });
-            }
-          });
         </script>
       </>
     )}

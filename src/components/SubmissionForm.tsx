@@ -95,6 +95,25 @@ export default function SubmissionForm({ currentSentence }: Props) {
   const [nudgeSentence, setNudgeSentence] = useState(currentSentence);
   const mountTimestamp = useRef(Date.now());
   const liveRef = useRef<HTMLDivElement>(null);
+  const turnstileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (step !== 'review') return;
+    const win = window as Window & {
+      turnstile?: { render: (el: HTMLElement, opts: { sitekey: string }) => void };
+      __turnstileSiteKey?: string;
+    };
+    if (!win.__turnstileSiteKey || !turnstileRef.current) return;
+    if (turnstileRef.current.childElementCount > 0) return; // already rendered
+    const tryRender = () => {
+      if (win.turnstile) {
+        win.turnstile.render(turnstileRef.current!, { sitekey: win.__turnstileSiteKey! });
+      } else {
+        setTimeout(tryRender, 200);
+      }
+    };
+    tryRender();
+  }, [step]);
 
   const announce = useCallback((msg: string, assertive = false) => {
     if (!liveRef.current) return;
@@ -331,7 +350,7 @@ export default function SubmissionForm({ currentSentence }: Props) {
             <p class="field-error" role="alert" aria-live="assertive">{apiError}</p>
           )}
 
-          <div id="turnstile-widget" style="margin-bottom:var(--sp-4)" />
+          <div ref={turnstileRef} id="turnstile-widget" style="margin-bottom:var(--sp-4)" />
 
           <div class="step-nav">
             <button type="button" class="btn btn-secondary" onClick={() => setStep('map')}>← Back</button>
