@@ -93,9 +93,18 @@ export default function SubmissionForm({ currentSentence }: Props) {
   const [submitState,   setSubmitState]   = useState<SubmitState>('idle');
   const [apiError,      setApiError]      = useState('');
   const [nudgeSentence, setNudgeSentence] = useState(currentSentence);
+  const [previewUrl,    setPreviewUrl]    = useState<string | null>(null);
+  const [lightboxOpen,  setLightboxOpen]  = useState(false);
   const mountTimestamp = useRef(Date.now());
   const liveRef = useRef<HTMLDivElement>(null);
   const turnstileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!compressedFile) { setPreviewUrl(null); return; }
+    const url = URL.createObjectURL(compressedFile);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [compressedFile]);
 
   useEffect(() => {
     if (step !== 'review') return;
@@ -246,10 +255,13 @@ export default function SubmissionForm({ currentSentence }: Props) {
             {photoState === 'compressing' && (
               <p class="form-hint" aria-live="polite">Preparing your photo…</p>
             )}
-            {photoState === 'ready' && compressedFile && (
+            {photoState === 'ready' && compressedFile && previewUrl && (
               <div class="photo-preview">
-                <span class="photo-preview-icon">🖼</span>
-                <span>Photo ready — {(compressedFile.size / 1024).toFixed(0)} KB</span>
+                <button type="button" class="photo-thumb-btn" onClick={() => setLightboxOpen(true)}
+                  aria-label="View uploaded photo">
+                  <img src={previewUrl} alt="Your uploaded photo" class="photo-thumb" />
+                </button>
+                <span>{(compressedFile.size / 1024).toFixed(0)} KB — tap to preview</span>
               </div>
             )}
             {photoError && <p class="field-error" role="alert">{photoError}</p>}
@@ -266,7 +278,15 @@ export default function SubmissionForm({ currentSentence }: Props) {
       {/* ── Step: Details ── */}
       {step === 'details' && (
         <section aria-label="Step 2: About this place">
-          <h2>About this place</h2>
+          <div class="details-header">
+            <h2>About this place</h2>
+            {previewUrl && (
+              <button type="button" class="photo-thumb-btn photo-thumb-btn--sm"
+                onClick={() => setLightboxOpen(true)} aria-label="View uploaded photo">
+                <img src={previewUrl} alt="Your uploaded photo" class="photo-thumb photo-thumb--sm" />
+              </button>
+            )}
+          </div>
 
           {submitState === 'nudge' && (
             <div class="nudge" role="alert">
@@ -360,6 +380,17 @@ export default function SubmissionForm({ currentSentence }: Props) {
             </button>
           </div>
         </section>
+      )}
+      {lightboxOpen && previewUrl && (
+        <div class="photo-lightbox" role="dialog" aria-modal="true" aria-label="Photo preview"
+          onClick={() => setLightboxOpen(false)}>
+          <button type="button" class="photo-lightbox-close" aria-label="Close preview"
+            onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }}>
+            ✕
+          </button>
+          <img src={previewUrl} alt="Your uploaded photo" class="photo-lightbox-img"
+            onClick={(e) => e.stopPropagation()} />
+        </div>
       )}
     </form>
   );
