@@ -1,6 +1,11 @@
 /// <reference path="../.astro/types.d.ts" />
 /// <reference types="@cloudflare/workers-types" />
 
+declare module '*.css' {
+  const content: string;
+  export default content;
+}
+
 // In @astrojs/cloudflare v13 / Astro v6, bindings are accessed via
 // `import { env } from 'cloudflare:workers'` — not Astro.locals.runtime.env.
 // Astro.locals.cfContext provides the ExecutionContext.
