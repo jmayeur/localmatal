@@ -152,6 +152,92 @@ export async function getUnresolvedReports(db: D1Database): Promise<Report[]> {
   return results as unknown as Report[];
 }
 
+// ─── Places (write) ───────────────────────────────────────────────────────────
+
+export async function insertPlace(
+  db: D1Database,
+  place: Omit<Place, 'is_tombstoned'> & { is_tombstoned?: boolean },
+): Promise<void> {
+  await db
+    .prepare(
+      `INSERT INTO places
+         (id, prev_place_id, place_name, contributor_name, sentence,
+          lat, lng, location_fuzz_m, geohash6, r2_key_prefix,
+          thumb_width, thumb_height, is_tombstoned, created_at, approved_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .bind(
+      place.id,
+      place.prev_place_id ?? null,
+      place.place_name,
+      place.contributor_name,
+      place.sentence,
+      place.lat,
+      place.lng,
+      place.location_fuzz_m,
+      place.geohash6 ?? null,
+      place.r2_key_prefix ?? null,
+      place.thumb_width ?? null,
+      place.thumb_height ?? null,
+      place.is_tombstoned ? 1 : 0,
+      place.created_at,
+      place.approved_at,
+    )
+    .run();
+}
+
+export async function updateCurrentPlace(db: D1Database, placeId: string): Promise<void> {
+  await db
+    .prepare("UPDATE current_place SET place_id = ? WHERE id = 'singleton'")
+    .bind(placeId)
+    .run();
+}
+
+export async function tombstonePlace(db: D1Database, placeId: string): Promise<void> {
+  await db
+    .prepare('UPDATE places SET is_tombstoned = 1 WHERE id = ?')
+    .bind(placeId)
+    .run();
+}
+
+export async function updateSubmissionStatus(
+  db: D1Database,
+  id: string,
+  status: 'approved' | 'rejected',
+  rejectionReason?: string,
+): Promise<void> {
+  await db
+    .prepare('UPDATE submissions SET status = ?, rejection_reason = ? WHERE id = ?')
+    .bind(status, rejectionReason ?? null, id)
+    .run();
+}
+
+export async function updateSubmissionFields(
+  db: D1Database,
+  id: string,
+  fields: { place_name?: string; contributor_name?: string; sentence?: string },
+): Promise<void> {
+  const sets: string[] = [];
+  const vals: unknown[] = [];
+  if (fields.place_name !== undefined) { sets.push('place_name = ?'); vals.push(fields.place_name); }
+  if (fields.contributor_name !== undefined) { sets.push('contributor_name = ?'); vals.push(fields.contributor_name); }
+  if (fields.sentence !== undefined) { sets.push('sentence = ?'); vals.push(fields.sentence); }
+  if (sets.length === 0) return;
+  vals.push(id);
+  await db.prepare(`UPDATE submissions SET ${sets.join(', ')} WHERE id = ?`).bind(...vals).run();
+}
+
+export async function resolveReport(
+  db: D1Database,
+  id: string,
+  resolution: string,
+): Promise<void> {
+  await db
+    .prepare('UPDATE reports SET resolved_at = ?, resolution = ? WHERE id = ?')
+    .bind(new Date().toISOString(), resolution, id)
+    .run();
+}
+
 // ─── Rate limits ──────────────────────────────────────────────────────────────
 
 export async function getRateLimit(

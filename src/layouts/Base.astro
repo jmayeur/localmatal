@@ -4,10 +4,12 @@ interface Props {
   description?: string;
   ogImage?: string;
   ogUrl?: string;
+  wide?: boolean;
 }
 
-const { title, description, ogImage, ogUrl } = Astro.props;
+const { title, description, ogImage, ogUrl, wide = false } = Astro.props;
 const siteName = 'LocalMatal';
+const currentPath = new URL(Astro.request.url).pathname;
 ---
 <!doctype html>
 <html lang="en">
@@ -26,9 +28,70 @@ const siteName = 'LocalMatal';
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
 
+    <link rel="alternate" type="application/rss+xml" title="LocalMatal" href="/feed.xml" />
     <link rel="stylesheet" href="/styles/global.css" />
+
+    <!-- Prevent theme flash: apply saved theme before paint -->
+    <script is:inline>
+      (function () {
+        var saved = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = saved || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
   <body>
-    <slot />
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <header class="site-header">
+      <a href="/" class="site-logo">{siteName}</a>
+      <nav class="site-nav" aria-label="Site navigation">
+        <a href="/gallery" aria-current={currentPath === '/gallery' ? 'page' : undefined}>Gallery</a>
+        <a href="/submit"  aria-current={currentPath === '/submit'  ? 'page' : undefined}>Share a place</a>
+      </nav>
+      <button
+        class="theme-toggle"
+        id="theme-toggle"
+        aria-label="Toggle light/dark theme"
+        title="Toggle theme"
+      >
+        <span id="theme-icon" aria-hidden="true">☀</span>
+      </button>
+    </header>
+
+    <main id="main" class={`site-main${wide ? ' wide' : ''}`}>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <span>© {new Date().getFullYear()} LocalMatal</span>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/feed.xml">RSS</a>
+    </footer>
+
+    <script is:inline>
+      (function () {
+        var toggle = document.getElementById('theme-toggle');
+        var icon   = document.getElementById('theme-icon');
+
+        function update() {
+          var theme = document.documentElement.getAttribute('data-theme') || 'light';
+          icon.textContent = theme === 'dark' ? '☽' : '☀';
+          toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+        }
+
+        update();
+
+        toggle.addEventListener('click', function () {
+          var current = document.documentElement.getAttribute('data-theme') || 'light';
+          var next = current === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('theme', next);
+          update();
+        });
+      })();
+    </script>
   </body>
 </html>

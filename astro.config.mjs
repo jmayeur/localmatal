@@ -9,4 +9,12 @@ export default defineConfig({
     prerenderEnvironment: 'node',
     remoteBindings: false,
   }),
+  vite: {
+    optimizeDeps: {
+      exclude: ['hono', '@hono/zod-validator', 'zod', 'browser-image-compression'],
+    },
+    ssr: {
+      external: ['hono', '@hono/zod-validator', 'zod'],
+    },
+  },
 });

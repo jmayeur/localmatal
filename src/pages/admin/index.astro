@@ -1,0 +1,220 @@
+---
+export const prerender = false;
+import { env } from 'cloudflare:workers';
+import BaseLayout from '../../layouts/Base.astro';
+import { getPendingSubmissions } from '../../lib/db';
+import { getImageUrl } from '../../lib/r2';
+
+const actor = Astro.request.headers.get('CF-Access-Authenticated-User-Email') ?? 'maintainer';
+const subs = await getPendingSubmissions(env.DB);
+const paused = env.SUBMISSIONS_PAUSED === 'true';
+
+const items = subs.map((s) => ({
+  ...s,
+  thumbUrl: s.r2_key_prefix
+    ? getImageUrl(env, `${s.r2_key_prefix}/thumb.webp`)
+    : null,
+}));
+
+const REJECTION_REASONS = [
+  'face_detected',
+  'nsfw_content',
+  'wrong_location_type',
+  'sentence_rules',
+  'name_rules',
+  'other',
+];
+---
+
+<BaseLayout title="Admin Queue — LocalMatal">
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 960px; margin: 0 auto; padding: 1rem 1.5rem; }
+    h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+    .meta { color: #666; font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .paused-banner { background: #fef3cd; border: 1px solid #d4a017; padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1.5rem; }
+    .queue-card { border: 1px solid #ddd; border-radius: 6px; margin-bottom: 1.5rem; padding: 1rem; display: grid; grid-template-columns: 120px 1fr; gap: 1rem; }
+    .queue-card img { width: 120px; height: 90px; object-fit: cover; border-radius: 4px; }
+    .queue-card .no-thumb { width: 120px; height: 90px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.75rem; color: #888; }
+    .field { margin-bottom: 0.4rem; }
+    .field label { font-size: 0.75rem; color: #666; display: block; }
+    .scores { display: flex; gap: 1rem; margin: 0.5rem 0; font-size: 0.8rem; }
+    .flag-warn { background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-weight: 600; font-size: 0.8rem; }
+    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; align-items: flex-end; }
+    .actions button { padding: 0.4rem 0.75rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+    .btn-approve { background: #198754; color: #fff; }
+    .btn-reject  { background: #dc3545; color: #fff; }
+    .btn-edit    { background: #0d6efd; color: #fff; }
+    select { padding: 0.35rem; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 4px; }
+    .edit-section { display: none; margin-top: 0.75rem; border-top: 1px solid #eee; padding-top: 0.75rem; }
+    .edit-section input, .edit-section textarea { width: 100%; padding: 0.35rem; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-bottom: 0.4rem; }
+    .empty { color: #666; text-align: center; padding: 3rem 0; }
+    nav { margin-bottom: 1.5rem; }
+    nav a { margin-right: 1rem; font-size: 0.9rem; }
+    .seed-section { border: 1px solid #ddd; border-radius: 6px; padding: 1rem; margin-bottom: 2rem; }
+    .seed-section h2 { font-size: 1.1rem; margin-top: 0; }
+    .seed-section input, .seed-section textarea { display: block; width: 100%; padding: 0.35rem; margin-bottom: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .seed-section label { font-size: 0.85rem; display: block; margin-bottom: 0.2rem; }
+    .coords { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    #seed-status { font-size: 0.85rem; margin-top: 0.5rem; }
+  </style>
+
+  <main>
+    <nav>
+      <a href="/admin">Queue ({items.length})</a>
+      <a href="/admin/reports">Reports</a>
+    </nav>
+
+    <h1>Moderation Queue</h1>
+    <p class="meta">Signed in as {actor}</p>
+
+    {paused && (
+      <div class="paused-banner">
+        ⏸ Submissions are currently <strong>paused</strong>. Toggle <code>SUBMISSIONS_PAUSED</code> in Cloudflare Pages env to resume.
+      </div>
+    )}
+    {!paused && (
+      <p class="meta" style="margin-top:-0.5rem">
+        To pause submissions: set <code>SUBMISSIONS_PAUSED = true</code> in Cloudflare Pages dashboard &gt; Settings &gt; Environment Variables.
+      </p>
+    )}
+
+    <!-- Seed form -->
+    <details class="seed-section">
+      <summary style="cursor:pointer;font-weight:600">Seed the chain (admin upload)</summary>
+      <div style="margin-top:1rem">
+        <label>Photo <input type="file" id="seed-photo" accept="image/*" /></label>
+        <label>Place name <input type="text" id="seed-place_name" maxlength="100" /></label>
+        <label>Your name <input type="text" id="seed-contributor_name" maxlength="80" /></label>
+        <label>Sentence <textarea id="seed-sentence" rows="2" maxlength="250"></textarea></label>
+        <div class="coords">
+          <label>Latitude <input type="number" id="seed-lat" step="any" /></label>
+          <label>Longitude <input type="number" id="seed-lng" step="any" /></label>
+        </div>
+        <button class="btn-approve" onclick="seedChain()">Seed</button>
+        <div id="seed-status"></div>
+      </div>
+    </details>
+
+    {items.length === 0
+      ? <p class="empty">Queue is clear.</p>
+      : items.map((s) => (
+        <article class="queue-card" id={`card-${s.id}`}>
+          <div>
+            {s.thumbUrl
+              ? <img src={s.thumbUrl} alt={s.sentence} width={s.thumb_width ?? 120} height={s.thumb_height ?? 90} loading="lazy" />
+              : <div class="no-thumb">No image</div>}
+          </div>
+          <div>
+            <div class="field"><label>Place</label><strong>{s.place_name}</strong></div>
+            <div class="field"><label>Contributor</label>{s.contributor_name}</div>
+            <div class="field"><label>Sentence</label><em>"{s.sentence}"</em></div>
+            <div class="scores">
+              <span>Face: {s.face_score != null ? s.face_score.toFixed(2) : '–'}</span>
+              <span>NSFW: {s.nsfw_score != null ? s.nsfw_score.toFixed(2) : '–'}</span>
+              <span>Overlap: {s.overlap_score != null ? s.overlap_score.toFixed(2) : '–'}</span>
+              {(s.overlap_degraded) && <span>⚠ overlap degraded</span>}
+            </div>
+            {s.ai_flags_unavailable && <div class="flag-warn">⚠ AI unavailable — manual review required</div>}
+
+            <div class="actions">
+              <button class="btn-approve" onclick={`approve('${s.id}')`}>Approve</button>
+              <select id={`reason-${s.id}`}>
+                {REJECTION_REASONS.map(r => <option value={r}>{r}</option>)}
+              </select>
+              <button class="btn-reject" onclick={`reject('${s.id}')`}>Reject</button>
+              <button class="btn-edit" onclick={`toggleEdit('${s.id}')`}>Edit</button>
+            </div>
+
+            <div class="edit-section" id={`edit-${s.id}`}>
+              <label>Place name
+                <input type="text" id={`edit-place_name-${s.id}`} value={s.place_name} maxlength="100" />
+              </label>
+              <label>Contributor name
+                <input type="text" id={`edit-contributor_name-${s.id}`} value={s.contributor_name} maxlength="80" />
+              </label>
+              <label>Sentence
+                <textarea id={`edit-sentence-${s.id}`} rows="2" maxlength="250">{s.sentence}</textarea>
+              </label>
+              <button class="btn-edit" onclick={`saveEdit('${s.id}')`}>Save edits</button>
+            </div>
+          </div>
+        </article>
+      ))
+    }
+  </main>
+
+  <script is:inline>
+    async function apiPost(url, body) {
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      return r;
+    }
+
+    async function approve(id) {
+      const r = await apiPost(`/api/v1/admin/submissions/${id}/approve`, {});
+      if (r.ok) { document.getElementById('card-' + id)?.remove(); }
+      else { alert('Approve failed: ' + (await r.json()).error?.message); }
+    }
+
+    async function reject(id) {
+      const reason = document.getElementById('reason-' + id)?.value;
+      const r = await apiPost(`/api/v1/admin/submissions/${id}/reject`, { reason });
+      if (r.ok) { document.getElementById('card-' + id)?.remove(); }
+      else { alert('Reject failed: ' + (await r.json()).error?.message); }
+    }
+
+    function toggleEdit(id) {
+      const el = document.getElementById('edit-' + id);
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    async function saveEdit(id) {
+      const place_name = document.getElementById('edit-place_name-' + id)?.value;
+      const contributor_name = document.getElementById('edit-contributor_name-' + id)?.value;
+      const sentence = document.getElementById('edit-sentence-' + id)?.value;
+      const r = await fetch(`/api/v1/admin/submissions/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ place_name, contributor_name, sentence }),
+      });
+      if (r.ok) {
+        alert('Saved. Refresh to see updated values.');
+        toggleEdit(id);
+      } else {
+        alert('Save failed: ' + (await r.json()).error?.message);
+      }
+    }
+
+    async function seedChain() {
+      const photo = document.getElementById('seed-photo').files[0];
+      const place_name = document.getElementById('seed-place_name').value;
+      const contributor_name = document.getElementById('seed-contributor_name').value;
+      const sentence = document.getElementById('seed-sentence').value;
+      const lat = document.getElementById('seed-lat').value;
+      const lng = document.getElementById('seed-lng').value;
+      if (!photo || !place_name || !contributor_name || !sentence || !lat || !lng) {
+        document.getElementById('seed-status').textContent = 'All fields required.';
+        return;
+      }
+      const fd = new FormData();
+      fd.append('photo', photo);
+      fd.append('place_name', place_name);
+      fd.append('contributor_name', contributor_name);
+      fd.append('sentence', sentence);
+      fd.append('lat', lat);
+      fd.append('lng', lng);
+      document.getElementById('seed-status').textContent = 'Seeding…';
+      const r = await fetch('/api/v1/admin/seed', { method: 'POST', body: fd });
+      if (r.ok) {
+        const j = await r.json();
+        document.getElementById('seed-status').textContent = `Seeded! Place ID: ${j.id}`;
+      } else {
+        const j = await r.json();
+        document.getElementById('seed-status').textContent = `Error: ${j.error?.message}`;
+      }
+    }
+  </script>
+</BaseLayout>
