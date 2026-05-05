@@ -34,14 +34,15 @@ if (!place) {
   }
 }
 
+const origin = Astro.url.origin;
 const modalUrl = place?.r2_key_prefix
-  ? getImageUrl(env, buildR2Key('approved', place.id, 'modal', 'webp'))
+  ? getImageUrl(env, buildR2Key('approved', place.id, 'modal', 'webp'), origin)
   : null;
 const thumbUrl = place?.r2_key_prefix
-  ? getImageUrl(env, buildR2Key('approved', place.id, 'thumb', 'webp'))
+  ? getImageUrl(env, buildR2Key('approved', place.id, 'thumb', 'webp'), origin)
   : null;
 
-const siteUrl = 'https://localmatal.com';
+const siteUrl = origin;
 const ogUrl = place ? `${siteUrl}/place/${place.id}` : siteUrl;
 ---
 

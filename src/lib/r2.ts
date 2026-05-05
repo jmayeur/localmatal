@@ -10,8 +10,19 @@ export function buildR2Key(
   return `${status}/${ulid}/${variant}.${ext}`;
 }
 
-export function getImageUrl(env: { IMAGES_BASE_URL: string }, key: string): string {
-  return `${env.IMAGES_BASE_URL}/${key}`;
+// origin should be e.g. "https://localmatal.com" — used to build absolute URLs
+// for OG tags and feeds. Falls back to the proxy path for img src attributes.
+export function getImageUrl(
+  env: { IMAGES_BASE_URL: string },
+  key: string,
+  origin?: string,
+): string {
+  // Use configured CDN domain when set (e.g. https://images.localmatal.com)
+  if (env.IMAGES_BASE_URL) {
+    return `${env.IMAGES_BASE_URL}/${key}`;
+  }
+  const base = origin ? `${origin}/api/v1/image` : '/api/v1/image';
+  return `${base}/${key}`;
 }
 
 // Copy all objects under srcPrefix to dstPrefix, then delete originals.

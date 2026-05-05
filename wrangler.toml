@@ -41,7 +41,7 @@ SUBMISSIONS_PAUSED = "false"
 OVERLAP_THRESHOLD = "0.65"
 OVERLAP_LLM_THRESHOLD = "0.50"
 DIGEST_THRESHOLD = "5"
-IMAGES_BASE_URL = "https://images.localmatal.com"
+IMAGES_BASE_URL = ""
 
 # ── Preview environment (isolated DB + bucket) ──────────────────────────────
 [env.preview]
@@ -69,4 +69,4 @@ SUBMISSIONS_PAUSED = "false"
 OVERLAP_THRESHOLD = "0.65"
 OVERLAP_LLM_THRESHOLD = "0.50"
 DIGEST_THRESHOLD = "5"
-IMAGES_BASE_URL = "https://images-preview.localmatal.com"
+IMAGES_BASE_URL = ""

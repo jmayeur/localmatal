@@ -18,14 +18,15 @@ if (!place) return new Response(null, { status: 404 });
 const allPlaces = await getApprovedPlaces(env.DB);
 const successor = allPlaces.find((p) => p.prev_place_id === id && !p.is_tombstoned);
 
+const origin = Astro.url.origin;
 const modalUrl = place.r2_key_prefix && !place.is_tombstoned
-  ? getImageUrl(env, buildR2Key('approved', place.id, 'modal', 'webp'))
+  ? getImageUrl(env, buildR2Key('approved', place.id, 'modal', 'webp'), origin)
   : null;
 const thumbUrl = place.r2_key_prefix && !place.is_tombstoned
-  ? getImageUrl(env, buildR2Key('approved', place.id, 'thumb', 'webp'))
+  ? getImageUrl(env, buildR2Key('approved', place.id, 'thumb', 'webp'), origin)
   : null;
 
-const siteUrl = 'https://localmatal.com';
+const siteUrl = origin;
 ---
 
 <Base

@@ -18,11 +18,12 @@ const places = await getApprovedPlaces(env.DB);
   ) : (
     <div class="gallery-grid">
       {places.map((place) => {
+        const origin = Astro.url.origin;
         const thumbUrl = place.r2_key_prefix
-          ? getImageUrl(env, buildR2Key('approved', place.id, 'thumb', 'webp'))
+          ? getImageUrl(env, buildR2Key('approved', place.id, 'thumb', 'webp'), origin)
           : null;
         const modalUrl = place.r2_key_prefix
-          ? getImageUrl(env, buildR2Key('approved', place.id, 'modal', 'webp'))
+          ? getImageUrl(env, buildR2Key('approved', place.id, 'modal', 'webp'), origin)
           : null;
 
         return (
