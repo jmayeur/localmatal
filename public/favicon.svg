@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <clipPath id="globe-clip">
+      <circle cx="16" cy="16" r="15"/>
+    </clipPath>
+  </defs>
+  <!-- Ocean -->
+  <circle cx="16" cy="16" r="15" fill="#1d6fa8"/>
+  <!-- Grid lines clipped to circle -->
+  <g clip-path="url(#globe-clip)" fill="none" stroke="white" stroke-width="1.2" opacity="0.55">
+    <!-- Equator -->
+    <ellipse cx="16" cy="16" rx="15" ry="5.5"/>
+    <!-- Tropic lines -->
+    <ellipse cx="16" cy="10" rx="13.5" ry="4"/>
+    <ellipse cx="16" cy="22" rx="13.5" ry="4"/>
+    <!-- Meridians -->
+    <ellipse cx="16" cy="16" rx="5.5" ry="15"/>
+    <line x1="16" y1="1" x2="16" y2="31"/>
+    <ellipse cx="16" cy="16" rx="12" ry="15"/>
+  </g>
+  <!-- Border -->
+  <circle cx="16" cy="16" r="15" fill="none" stroke="#0e4f7a" stroke-width="1"/>
+</svg>
