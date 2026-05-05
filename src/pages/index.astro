@@ -10,23 +10,27 @@ import { getCurrentPlaceFromDb } from '../lib/db';
 import { getImageUrl, buildR2Key } from '../lib/r2';
 
 // KV cache with D1 fallback
-let place = await getCurrentPlace(env.CURRENT_PLACE_CACHE);
+let place = await getCurrentPlace(env.CURRENT_PLACE_CACHE).catch(() => null);
 if (!place) {
-  const dbPlace = await getCurrentPlaceFromDb(env.DB);
-  if (dbPlace && dbPlace.r2_key_prefix) {
-    place = {
-      id: dbPlace.id,
-      place_name: dbPlace.place_name,
-      contributor_name: dbPlace.contributor_name,
-      sentence: dbPlace.sentence,
-      lat: dbPlace.lat,
-      lng: dbPlace.lng,
-      r2_key_prefix: dbPlace.r2_key_prefix,
-      thumb_width: dbPlace.thumb_width,
-      thumb_height: dbPlace.thumb_height,
-      approved_at: dbPlace.approved_at,
-    };
-    await setCurrentPlace(env.CURRENT_PLACE_CACHE, place);
+  try {
+    const dbPlace = await getCurrentPlaceFromDb(env.DB);
+    if (dbPlace && dbPlace.r2_key_prefix) {
+      place = {
+        id: dbPlace.id,
+        place_name: dbPlace.place_name,
+        contributor_name: dbPlace.contributor_name,
+        sentence: dbPlace.sentence,
+        lat: dbPlace.lat,
+        lng: dbPlace.lng,
+        r2_key_prefix: dbPlace.r2_key_prefix,
+        thumb_width: dbPlace.thumb_width,
+        thumb_height: dbPlace.thumb_height,
+        approved_at: dbPlace.approved_at,
+      };
+      await setCurrentPlace(env.CURRENT_PLACE_CACHE, place).catch(() => {});
+    }
+  } catch {
+    // DB not ready (migrations pending) — show empty state
   }
 }
 
