@@ -68,7 +68,7 @@ submissionsRouter.post(
           {
             error: {
               code: ErrorCode.CONCEPT_OVERLAP_FAILED,
-              message: 'Your sentence must connect with the previous one.',
+              message: 'Your description must connect with the previous one.',
               field: 'sentence',
             },
             currentSentence: currentPlace.sentence,

@@ -6,8 +6,9 @@ import Base from '../layouts/Base.astro';
 import MapIsland from '../components/MapIsland';
 import ReportLink from '../components/ReportLink.astro';
 import { getCurrentPlace, setCurrentPlace } from '../lib/kv';
-import { getCurrentPlaceFromDb } from '../lib/db';
+import { getCurrentPlaceFromDb, getApprovedPlaces } from '../lib/db';
 import { getImageUrl, buildR2Key } from '../lib/r2';
+import ChainNav from '../components/ChainNav.astro';
 
 // KV cache with D1 fallback
 let place = await getCurrentPlace(env.CURRENT_PLACE_CACHE).catch(() => null);
@@ -44,6 +45,18 @@ const thumbUrl = place?.r2_key_prefix
 
 const siteUrl = origin;
 const ogUrl = place ? `${siteUrl}/place/${place.id}` : siteUrl;
+
+// Resolve prev/next for chain nav
+let prevId: string | null = null;
+let nextId: string | null = null;
+if (place) {
+  try {
+    const allPlaces = await getApprovedPlaces(env.DB);
+    prevId = allPlaces.find(p => p.id === place!.id)?.prev_place_id ?? null;
+    const successor = allPlaces.find(p => p.prev_place_id === place!.id && !p.is_tombstoned);
+    nextId = successor?.id ?? null;
+  } catch { /* non-fatal */ }
+}
 ---
 
 <Base
@@ -74,8 +87,13 @@ const ogUrl = place ? `${siteUrl}/place/${place.id}` : siteUrl;
     <p>The chain is getting started. Check back soon.</p>
   )}
 
+  <ChainNav prevId={prevId} nextId={nextId} />
+
   <p class="chain-prompt">
-    Add the next place. Your sentence has to share at least one feeling, image, or idea with this one.
+    Add the next place. Your description has to share at least one feeling, image, or idea with this one.
   </p>
-  <a href="/submit" class="cta-link">Add a place →</a>
+  <div class="index-actions">
+    <a href="/submit" class="cta-link">Add a place →</a>
+    <a href="/how-to-play" class="secondary-link">How to play</a>
+  </div>
 </Base>

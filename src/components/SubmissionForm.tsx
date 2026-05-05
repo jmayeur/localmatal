@@ -193,7 +193,7 @@ export default function SubmissionForm({ currentSentence }: Props) {
         setNudgeSentence(json.currentSentence ?? currentSentence);
         setSubmitState('nudge');
         setStep('details');
-        announce('Your sentence needs to connect with the previous one.', true);
+        announce('Your description needs to connect with the previous one.', true);
         return;
       }
       if (!res.ok) {
@@ -311,7 +311,7 @@ export default function SubmissionForm({ currentSentence }: Props) {
 
           <div class="form-group">
             <label class="form-label" for="sentence">
-              One sentence about why this place moves you
+              A short description of why this place moves you
             </label>
             <textarea id="sentence" class="form-input form-textarea" rows={3} maxLength={250} required
               value={values.sentence}

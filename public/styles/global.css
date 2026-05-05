@@ -679,6 +679,42 @@ code {
 .cta-link:hover { background: var(--accent-light); }
 .cta-link:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 
+.index-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+.secondary-link {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.secondary-link:hover { color: var(--text); }
+
+/* ─── How to play ────────────────────────────────────────────────────────── */
+.how-to-play { max-width: 640px; }
+.how-to-play .lede {
+  font-size: var(--text-lg);
+  color: var(--text-muted);
+  margin: 0 0 var(--sp-8);
+  line-height: 1.6;
+}
+.how-to-play h2 { margin: var(--sp-8) 0 var(--sp-3); }
+.how-to-play ol,
+.how-to-play ul {
+  padding-left: var(--sp-6);
+  margin: 0 0 var(--sp-4);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.7;
+}
+.how-to-play li { margin-bottom: var(--sp-2); }
+.how-to-play-cta { margin-top: var(--sp-10); }
+
 /* ─── Report link ────────────────────────────────────────────────────────── */
 .report-link { font-family: var(--font-sans); font-size: var(--text-sm); color: var(--text-muted); margin-top: var(--sp-8); }
 .report-link button {

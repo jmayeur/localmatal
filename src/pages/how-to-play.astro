@@ -1,0 +1,73 @@
+---
+export const prerender = true;
+
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="How to play — LocalMatal" description="LocalMatal is a slow, collaborative chain of places. Here's how it works.">
+  <article class="how-to-play">
+    <h1>How to play</h1>
+
+    <p class="lede">
+      LocalMatal is a slow, collaborative chain of places. Every entry is a single photo
+      and a short description. Each new description has to connect — in feeling, image, or idea —
+      with the one before it.
+    </p>
+
+    <h2>The chain</h2>
+    <p>
+      The home page always shows the current place at the front of the chain. Use
+      <strong>← previous place</strong> and <strong>next place →</strong> to walk the whole
+      chain from any point. Every place has its own permalink you can share.
+    </p>
+
+    <h2>Adding your place</h2>
+    <ol>
+      <li>
+        <strong>Choose a photo.</strong> Take or upload a photo of a real place you love.
+        It can be anywhere — a street corner, a mountain, a room. The photo is cropped and
+        compressed automatically; originals are never stored.
+      </li>
+      <li>
+        <strong>Write a short description.</strong> Tell us why this place moves you. The description
+        has to share at least one feeling, image, or idea with the current place at the top
+        of the chain. If it doesn't connect, you'll get a nudge and a chance to revise.
+      </li>
+      <li>
+        <strong>Pin it on the map.</strong> Drop a marker near your place. The exact
+        coordinates are fuzzed before display, so no precise location is ever shown publicly.
+      </li>
+      <li>
+        <strong>Submit.</strong> Your entry goes into a moderation queue. Once approved it
+        joins the chain and becomes the new current place.
+      </li>
+    </ol>
+
+    <h2>What gets approved</h2>
+    <ul>
+      <li>Real places — somewhere you can actually stand.</li>
+      <li>A short, honest description — not a list, not an ad, not a caption.</li>
+      <li>A photo you took or have the right to share.</li>
+      <li>Content that is kind, legal, and safe for all audiences.</li>
+    </ul>
+
+    <h2>What doesn't</h2>
+    <ul>
+      <li>Stock photos, AI-generated images, or screenshots.</li>
+      <li>Descriptions that don't connect to the previous entry.</li>
+      <li>Commercial promotion or spam.</li>
+      <li>Anything harmful, hateful, or private (faces, addresses, etc.).</li>
+    </ul>
+
+    <h2>Privacy</h2>
+    <p>
+      Your name (or pseudonym) and photo are public once approved. No account is required.
+      If you want an entry removed, use the report link on any place page and explain your
+      request — we'll handle it promptly.
+    </p>
+
+    <div class="how-to-play-cta">
+      <a href="/" class="cta-link">See the current place →</a>
+    </div>
+  </article>
+</Base>
