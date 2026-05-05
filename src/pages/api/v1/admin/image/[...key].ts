@@ -28,7 +28,11 @@ export const GET: APIRoute = async ({ params, request }) => {
   const key = params.key;
   if (!key) return new Response('Not found', { status: 404 });
 
-  const obj = await env.MEDIA.get(key);
+  const stem = key.replace(/\.[^./]+$/, '');
+  const obj = await env.MEDIA.get(key)
+    ?? await env.MEDIA.get(`${stem}.jpeg`)
+    ?? await env.MEDIA.get(`${stem}.png`)
+    ?? await env.MEDIA.get(`${stem}.webp`);
   if (!obj) return new Response('Not found', { status: 404 });
 
   const headers = new Headers();
