@@ -13,7 +13,7 @@ crons = ["0 3 * * *"]
 [[env.backup.d1_databases]]
 binding = "DB"
 database_name = "localmatal"
-database_id = "PLACEHOLDER_REPLACE_WITH_REAL_ID"
+database_id = "f729b946-522a-4d12-b33e-661a86074a55"
 
 [[env.backup.r2_buckets]]
 binding = "MEDIA"
@@ -22,7 +22,7 @@ bucket_name = "localmatal-images"
 [[d1_databases]]
 binding = "DB"
 database_name = "localmatal"
-database_id = "PLACEHOLDER_REPLACE_WITH_REAL_ID"
+database_id = "f729b946-522a-4d12-b33e-661a86074a55"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
@@ -31,7 +31,7 @@ bucket_name = "localmatal-images"
 
 [[kv_namespaces]]
 binding = "CURRENT_PLACE_CACHE"
-id = "PLACEHOLDER_REPLACE_WITH_REAL_ID"
+id = "2de0bf0f7e904b7eb35110833e45871e"
 
 [ai]
 binding = "AI"
@@ -50,7 +50,7 @@ name = "localmatal-preview"
 [[env.preview.d1_databases]]
 binding = "DB"
 database_name = "localmatal-preview"
-database_id = "PLACEHOLDER_PREVIEW_DB_ID"
+database_id = "f775ae78-4b36-4b54-98e8-3a19767f3b30"
 migrations_dir = "migrations"
 
 [[env.preview.r2_buckets]]
@@ -59,7 +59,7 @@ bucket_name = "localmatal-images-preview"
 
 [[env.preview.kv_namespaces]]
 binding = "CURRENT_PLACE_CACHE"
-id = "PLACEHOLDER_PREVIEW_KV_ID"
+id = "24c9a02c33dc4bcf8ec96aaccdfdc22e"
 
 [env.preview.ai]
 binding = "AI"

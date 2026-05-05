@@ -33,6 +33,6 @@
     "eslint": "^9.0.0",
     "eslint-plugin-astro": "^1.0.0",
     "vitest": "^2.0.0",
-    "wrangler": "^4.83.0"
+    "wrangler": "^4.87.0"
   }
 }
