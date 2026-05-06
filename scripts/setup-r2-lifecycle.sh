@@ -24,6 +24,6 @@ cat > "$TMPFILE" <<JSON
 }
 JSON
 
-npx wrangler r2 bucket lifecycle set "$BUCKET" "$TMPFILE"
+npx wrangler r2 bucket lifecycle set "$BUCKET" --file "$TMPFILE" --force
 
 echo "Done. Verify with: npx wrangler r2 bucket lifecycle list $BUCKET"
