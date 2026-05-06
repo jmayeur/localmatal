@@ -42,4 +42,5 @@ interface Env {
   IMAGES_BASE_URL: string;
   IP_HASH_SALT: string;
   ADMIN_SECRET: string;
+  CF_TEAM_DOMAIN: string;
 }
