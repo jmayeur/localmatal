@@ -8,9 +8,22 @@ RULE_ID="backup-retention-30d"
 
 echo "Setting 30-day lifecycle rule on R2 bucket: $BUCKET (prefix: backups/)"
 
-npx wrangler r2 bucket lifecycle set "$BUCKET" \
-  --rule-id "$RULE_ID" \
-  --prefix "backups/" \
-  --expire-days 30
+TMPFILE=$(mktemp /tmp/r2-lifecycle-XXXXXX.json)
+trap 'rm -f "$TMPFILE"' EXIT
+
+cat > "$TMPFILE" <<JSON
+{
+  "Rules": [
+    {
+      "ID": "$RULE_ID",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "backups/" },
+      "Expiration": { "Days": 30 }
+    }
+  ]
+}
+JSON
+
+npx wrangler r2 bucket lifecycle set "$BUCKET" "$TMPFILE"
 
 echo "Done. Verify with: npx wrangler r2 bucket lifecycle list $BUCKET"
