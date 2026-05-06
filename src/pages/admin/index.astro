@@ -3,28 +3,14 @@ export const prerender = false;
 import { env as _env } from 'cloudflare:workers';
 import BaseLayout from '../../layouts/Base.astro';
 import { getPendingSubmissions } from '../../lib/db';
+import { getAdminEmail } from '../../lib/adminAuth';
 
 const env = _env as unknown as Env;
 
-// HTTP Basic Auth
-function checkAuth(request: Request): boolean {
-  const auth = request.headers.get('Authorization') ?? '';
-  if (!auth.startsWith('Basic ')) return false;
-  try {
-    const decoded = atob(auth.slice(6));
-    const password = decoded.split(':').slice(1).join(':');
-    return password === env.ADMIN_SECRET;
-  } catch { return false; }
+const actor = await getAdminEmail(Astro.request, env);
+if (!actor) {
+  return new Response('Unauthorized', { status: 401 });
 }
-
-if (!checkAuth(Astro.request)) {
-  return new Response('Unauthorized', {
-    status: 401,
-    headers: { 'WWW-Authenticate': 'Basic realm="LocalMatal Admin"' },
-  });
-}
-
-const actor = Astro.request.headers.get('CF-Access-Authenticated-User-Email') ?? 'maintainer';
 const subs = await getPendingSubmissions(env.DB);
 const paused = env.SUBMISSIONS_PAUSED === 'true';
 
