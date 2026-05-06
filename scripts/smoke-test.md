@@ -5,6 +5,34 @@ Check each item, sign with initials and date.
 
 ---
 
+## Pre-flight commands (run before manual checks)
+
+```bash
+# 1. Deploy the backup cron worker (one-time; confirm it shows in Cloudflare dashboard)
+npx wrangler deploy --env backup
+
+# 2. Set 30-day R2 lifecycle rule on backups/ prefix (one-time)
+bash scripts/setup-r2-lifecycle.sh
+
+# 3. Run concept-overlap calibration (needs Cloudflare Workers AI — not local)
+#    Terminal A:
+cd scripts/overlap-calibration && npx wrangler dev worker.ts --local false
+#    Terminal B (once wrangler dev is listening on :8787):
+npx tsx scripts/overlap-calibration/run.ts
+#    Review the recommended OVERLAP_THRESHOLD in the output and confirm wrangler.toml matches.
+#    Results are written to scripts/overlap-calibration/results-{date}.json — commit that file.
+```
+
+### Cloudflare Worker error alerts (dashboard — one-time)
+1. Workers & Pages → `localmatal` → Notifications tab
+2. Add notification: **Workers error rate** — threshold 1%, window 5 min
+3. Add notification: **Workers error rate** → `localmatal-backup` — any failure triggers alert
+4. Email: maintainer address
+
+---
+
+---
+
 ## Public pages
 
 - [ ] **Homepage loads** — place photo, name, sentence, contributor, map pin visible
