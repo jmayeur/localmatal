@@ -1,0 +1,32 @@
+# LocalMatal
+
+> A collaborative chain of places connected by language. Each place in the chain shares at least one feeling, image, or idea with the one before it.
+
+LocalMatal is a slow, human-made collection of real places around the world. Contributors photograph a place that matters to them and write one sentence describing it. That sentence must share a concept — a feeling, a concrete image, or an idea — with the sentence written by the previous contributor. The result is a chain of places linked by language, not geography.
+
+## How it works
+
+- The homepage shows the current place at the end of the chain.
+- Each place has a permanent URL at /place/{id}.
+- Contributors submit a new place via /submit. Submissions are moderated before joining the chain.
+- The full chain is browsable at /gallery.
+- A machine-readable feed is available at /feed.xml (RSS 2.0).
+- A sitemap of all approved places is at /sitemap.xml.
+
+## Content
+
+- All place descriptions are original, human-written sentences.
+- Each sentence is semantically connected to the one before it in the chain.
+- Places include a photograph, a place name, a one-sentence description, and an approximate location.
+- Contributor names are displayed alongside each place.
+- Exact GPS coordinates are fuzzy for contributor privacy.
+
+## What is not here
+
+- No advertising or tracking.
+- No algorithmically generated content.
+- The /admin, /api, and /pending paths are not public.
+
+## Contact
+
+For content removal requests or questions, see the Privacy Policy at /privacy.

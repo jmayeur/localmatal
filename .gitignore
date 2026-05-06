@@ -26,6 +26,7 @@ _bmad/
 .agents/
 .claude/
 !.claude/commands/
+!.claude/skills/
 
 # OS
 .DS_Store

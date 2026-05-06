@@ -46,6 +46,41 @@ const thumbUrl = place?.r2_key_prefix
 const siteUrl = origin;
 const ogUrl = place ? `${siteUrl}/place/${place.id}` : siteUrl;
 
+const jsonLd = place
+  ? {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'WebSite',
+          '@id': `${siteUrl}/#website`,
+          url: siteUrl,
+          name: 'LocalMatal',
+          description:
+            'A collaborative chain of places — each linked by a shared feeling, image, or idea.',
+        },
+        {
+          '@type': 'Article',
+          '@id': `${siteUrl}/place/${place.id}#article`,
+          headline: place.place_name,
+          description: place.sentence,
+          author: { '@type': 'Person', name: place.contributor_name },
+          datePublished: place.approved_at,
+          image: modalUrl ?? undefined,
+          url: `${siteUrl}/place/${place.id}`,
+          isPartOf: { '@id': `${siteUrl}/#website` },
+        },
+      ],
+    }
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      '@id': `${siteUrl}/#website`,
+      url: siteUrl,
+      name: 'LocalMatal',
+      description:
+        'A collaborative chain of places — each linked by a shared feeling, image, or idea.',
+    };
+
 // Resolve prev/next for chain nav
 let prevId: string | null = null;
 let nextId: string | null = null;
@@ -66,6 +101,9 @@ if (place) {
   description={place?.sentence}
   ogImage={modalUrl ?? undefined}
   ogUrl={ogUrl}
+  ogType={place ? 'article' : 'website'}
+  articlePublishedTime={place?.approved_at}
+  jsonLd={jsonLd}
 >
   {
     place ? (

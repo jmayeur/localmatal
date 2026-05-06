@@ -29,6 +29,26 @@ const thumbUrl =
     : null;
 
 const siteUrl = origin;
+
+const jsonLd = !place.is_tombstoned
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      '@id': `${siteUrl}/place/${id}#article`,
+      headline: place.place_name,
+      description: place.sentence,
+      author: { '@type': 'Person', name: place.contributor_name },
+      datePublished: place.approved_at,
+      image: modalUrl ?? undefined,
+      url: `${siteUrl}/place/${id}`,
+      isPartOf: {
+        '@type': 'WebSite',
+        '@id': `${siteUrl}/#website`,
+        name: 'LocalMatal',
+        url: siteUrl,
+      },
+    }
+  : undefined;
 ---
 
 <Base
@@ -36,6 +56,9 @@ const siteUrl = origin;
   description={place.is_tombstoned ? undefined : place.sentence}
   ogImage={modalUrl ?? undefined}
   ogUrl={`${siteUrl}/place/${id}`}
+  ogType={place.is_tombstoned ? 'website' : 'article'}
+  articlePublishedTime={place.is_tombstoned ? undefined : place.approved_at}
+  jsonLd={jsonLd}
 >
   {
     place.is_tombstoned ? (
