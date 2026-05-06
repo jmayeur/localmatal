@@ -5,6 +5,16 @@ interface JwksKey extends JsonWebKey {
   kid: string;
 }
 
+function algParams(alg: string): AlgorithmIdentifier | RsaPssParams | EcdsaParams {
+  if (alg === 'ES256') return { name: 'ECDSA', hash: 'SHA-256' };
+  return { name: 'RSASSA-PKCS1-v1_5' }; // RS256
+}
+
+function importParams(alg: string): RsaHashedImportParams | EcKeyImportParams {
+  if (alg === 'ES256') return { name: 'ECDSA', namedCurve: 'P-256' };
+  return { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' };
+}
+
 async function verifyAccessJwt(token: string, teamDomain: string): Promise<string | null> {
   try {
     const parts = token.split('.');
@@ -28,17 +38,17 @@ async function verifyAccessJwt(token: string, teamDomain: string): Promise<strin
     const cryptoKey = await crypto.subtle.importKey(
       'jwk',
       jwk,
-      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+      importParams(header.alg),
       false,
       ['verify'],
     );
 
     const sigBytes = Uint8Array.from(
       atob(sigB64.replace(/-/g, '+').replace(/_/g, '/')),
-      (c) => c.charCodeAt(0),
+      (ch) => ch.charCodeAt(0),
     );
     const data = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
-    const valid = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', cryptoKey, sigBytes, data);
+    const valid = await crypto.subtle.verify(algParams(header.alg), cryptoKey, sigBytes, data);
 
     return valid ? (payload.email ?? null) : null;
   } catch {
