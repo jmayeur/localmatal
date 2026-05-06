@@ -25,15 +25,24 @@ async function verifyAccessJwt(token: string, teamDomain: string): Promise<strin
     const header = decode(headerB64);
     const payload = decode(payloadB64);
 
-    if (payload.exp && Date.now() / 1000 > payload.exp) return null;
+    if (payload.exp && Date.now() / 1000 > payload.exp) {
+      console.error('[adminAuth] JWT expired');
+      return null;
+    }
 
-    const jwksRes = await fetch(
-      `https://${teamDomain}.cloudflareaccess.com/cdn-cgi/access/certs`,
-    );
-    if (!jwksRes.ok) return null;
+    const jwksUrl = `https://${teamDomain}.cloudflareaccess.com/cdn-cgi/access/certs`;
+    const jwksRes = await fetch(jwksUrl);
+    if (!jwksRes.ok) {
+      console.error('[adminAuth] JWKS fetch failed:', jwksRes.status, jwksUrl);
+      return null;
+    }
     const { keys } = await jwksRes.json<{ keys: JwksKey[] }>();
+    console.error('[adminAuth] JWKS kids:', keys.map((k) => k.kid), 'looking for:', header.kid);
     const jwk = keys.find((k) => k.kid === header.kid);
-    if (!jwk) return null;
+    if (!jwk) {
+      console.error('[adminAuth] kid not found in JWKS');
+      return null;
+    }
 
     const cryptoKey = await crypto.subtle.importKey(
       'jwk',
@@ -51,7 +60,8 @@ async function verifyAccessJwt(token: string, teamDomain: string): Promise<strin
     const valid = await crypto.subtle.verify(algParams(header.alg), cryptoKey, sigBytes, data);
 
     return valid ? (payload.email ?? null) : null;
-  } catch {
+  } catch (err) {
+    console.error('[adminAuth] JWT verify error:', err);
     return null;
   }
 }
