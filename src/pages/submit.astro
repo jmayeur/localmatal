@@ -26,27 +26,35 @@ const turnstileSiteKey = env.TURNSTILE_SITE_KEY;
 <BaseLayout title="Share a place — LocalMatal" description="Contribute a place to the chain.">
   <h1>Share a place</h1>
 
-    {paused ? (
+  {
+    paused ? (
       <p class="paused-notice">Submissions are temporarily paused. Check back soon.</p>
     ) : (
       <>
         <p class="chain-context">
-          {currentSentence
-            ? <>The chain's current thread: <em>"{currentSentence}"</em> — your description must connect with it.</>
-            : 'Be the first entry in the chain.'}
+          {currentSentence ? (
+            <>
+              The chain's current thread: <em>"{currentSentence}"</em> — your description must
+              connect with it.
+            </>
+          ) : (
+            'Be the first entry in the chain.'
+          )}
         </p>
 
         <SubmissionForm client:load currentSentence={currentSentence} />
 
         <p class="legal-links" style="font-size:0.8rem;color:#666;margin-top:1.5rem">
-          By submitting you agree to the <a href="/terms">Terms of Service</a> and acknowledge our <a href="/privacy">Privacy Policy</a>.
+          By submitting you agree to the <a href="/terms">Terms of Service</a> and acknowledge our{' '}
+          <a href="/privacy">Privacy Policy</a>.
         </p>
 
         {/* Cloudflare Turnstile — SubmissionForm renders the widget on step 4 */}
-        <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
         <script is:inline define:vars={{ turnstileSiteKey }}>
           window.__turnstileSiteKey = turnstileSiteKey;
         </script>
       </>
-    )}
+    )
+  }
 </BaseLayout>

@@ -14,10 +14,11 @@ export const GET: APIRoute = async ({ params }) => {
 
   // Try the requested key, then fall back to common extensions (stored ext may differ)
   const stem = key.replace(/\.[^./]+$/, '');
-  const obj = await env.MEDIA.get(key)
-    ?? await env.MEDIA.get(`${stem}.jpeg`)
-    ?? await env.MEDIA.get(`${stem}.png`)
-    ?? await env.MEDIA.get(`${stem}.webp`);
+  const obj =
+    (await env.MEDIA.get(key)) ??
+    (await env.MEDIA.get(`${stem}.jpeg`)) ??
+    (await env.MEDIA.get(`${stem}.png`)) ??
+    (await env.MEDIA.get(`${stem}.webp`));
   if (!obj) return new Response('Not found', { status: 404 });
 
   const headers = new Headers();

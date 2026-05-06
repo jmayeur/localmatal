@@ -9,8 +9,5 @@ export const GET: APIRoute = ({ request }) => {
   const lat = cf?.latitude ? parseFloat(cf.latitude) : null;
   const lng = cf?.longitude ? parseFloat(cf.longitude) : null;
 
-  return Response.json(
-    { lat, lng },
-    { headers: { 'Cache-Control': 'no-store' } },
-  );
+  return Response.json({ lat, lng }, { headers: { 'Cache-Control': 'no-store' } });
 };

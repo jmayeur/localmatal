@@ -72,14 +72,30 @@ export function GalleryModal() {
       aria-modal="true"
       aria-label={place?.place_name ?? 'Place detail'}
       onClick={handleBackdropClick}
-      style={{ maxWidth: '640px', width: '90vw', padding: '1.5rem', borderRadius: '4px', border: '1px solid var(--border)' }}
+      style={{
+        maxWidth: '640px',
+        width: '90vw',
+        padding: '1.5rem',
+        borderRadius: '4px',
+        border: '1px solid var(--border)',
+      }}
     >
       {place && (
         <>
           <button
-            onClick={() => { activePlace.value = null; }}
+            onClick={() => {
+              activePlace.value = null;
+            }}
             aria-label="Close"
-            style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem', minHeight: '44px', minWidth: '44px' }}
+            style={{
+              float: 'right',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1.25rem',
+              minHeight: '44px',
+              minWidth: '44px',
+            }}
           >
             ✕
           </button>
@@ -88,9 +104,13 @@ export function GalleryModal() {
             alt={place.sentence}
             style={{ width: '100%', height: 'auto', borderRadius: '2px', marginBottom: '1rem' }}
           />
-          <h2 style={{ margin: '0 0 0.25rem', fontSize: '1.25rem', fontWeight: 'normal' }}>{place.place_name}</h2>
+          <h2 style={{ margin: '0 0 0.25rem', fontSize: '1.25rem', fontWeight: 'normal' }}>
+            {place.place_name}
+          </h2>
           <p style={{ fontStyle: 'italic', margin: '0 0 0.25rem' }}>"{place.sentence}"</p>
-          <p style={{ fontSize: '0.875rem', color: 'var(--muted)', margin: '0 0 1rem' }}>— {place.contributor_name}</p>
+          <p style={{ fontSize: '0.875rem', color: 'var(--muted)', margin: '0 0 1rem' }}>
+            — {place.contributor_name}
+          </p>
           <MapIsland mode="display" lat={place.lat} lng={place.lng} fuzzed={true} />
           <p style={{ marginTop: '1rem' }}>
             <a href={`/place/${place.id}`} style={{ color: 'var(--accent)' }}>

@@ -52,10 +52,12 @@ let nextId: string | null = null;
 if (place) {
   try {
     const allPlaces = await getApprovedPlaces(env.DB);
-    prevId = allPlaces.find(p => p.id === place!.id)?.prev_place_id ?? null;
-    const successor = allPlaces.find(p => p.prev_place_id === place!.id && !p.is_tombstoned);
+    prevId = allPlaces.find((p) => p.id === place!.id)?.prev_place_id ?? null;
+    const successor = allPlaces.find((p) => p.prev_place_id === place!.id && !p.is_tombstoned);
     nextId = successor?.id ?? null;
-  } catch { /* non-fatal */ }
+  } catch {
+    /* non-fatal */
+  }
 }
 ---
 
@@ -65,32 +67,35 @@ if (place) {
   ogImage={modalUrl ?? undefined}
   ogUrl={ogUrl}
 >
-  {place ? (
-    <article>
-      {modalUrl && (
-        <img
-          src={modalUrl}
-          alt={place.sentence}
-          width={place.thumb_width ?? undefined}
-          height={place.thumb_height ?? undefined}
-          class="place-photo"
-          loading="eager"
-        />
-      )}
-      <h1 class="place-name">{place.place_name}</h1>
-      <p class="place-sentence">"{place.sentence}"</p>
-      <p class="place-contributor">— {place.contributor_name}</p>
-      <MapIsland mode="display" lat={place.lat} lng={place.lng} fuzzed={true} client:visible />
-      <ReportLink placeId={place.id} />
-    </article>
-  ) : (
-    <p>The chain is getting started. Check back soon.</p>
-  )}
+  {
+    place ? (
+      <article>
+        {modalUrl && (
+          <img
+            src={modalUrl}
+            alt={place.sentence}
+            width={place.thumb_width ?? undefined}
+            height={place.thumb_height ?? undefined}
+            class="place-photo"
+            loading="eager"
+          />
+        )}
+        <h1 class="place-name">{place.place_name}</h1>
+        <p class="place-sentence">"{place.sentence}"</p>
+        <p class="place-contributor">— {place.contributor_name}</p>
+        <MapIsland mode="display" lat={place.lat} lng={place.lng} fuzzed={true} client:visible />
+        <ReportLink placeId={place.id} />
+      </article>
+    ) : (
+      <p>The chain is getting started. Check back soon.</p>
+    )
+  }
 
   <ChainNav prevId={prevId} nextId={nextId} />
 
   <p class="chain-prompt">
-    Add the next place. Your description has to share at least one feeling, image, or idea with this one.
+    Add the next place. Your description has to share at least one feeling, image, or idea with this
+    one.
   </p>
   <div class="index-actions">
     <a href="/submit" class="cta-link">Add a place →</a>

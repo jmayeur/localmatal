@@ -9,6 +9,8 @@
     "astro": "astro",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "deploy": "wrangler deploy --config dist/server/wrangler.json"
@@ -31,7 +33,10 @@
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.0.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-astro": "^0.14.1",
     "vitest": "^2.0.0",
     "wrangler": "^4.87.0"
   }

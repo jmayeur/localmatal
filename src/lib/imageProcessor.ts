@@ -20,12 +20,23 @@ function matchesMagic(buf: Uint8Array, magic: Uint8Array, offset = 0) {
 function detectType(buf: Uint8Array): 'jpeg' | 'png' | 'webp' | 'heic' | null {
   if (matchesMagic(buf, MAGIC.jpeg)) return 'jpeg';
   if (matchesMagic(buf, MAGIC.png)) return 'png';
-  if (matchesMagic(buf, MAGIC.webp) && buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50) return 'webp';
+  if (
+    matchesMagic(buf, MAGIC.webp) &&
+    buf[8] === 0x57 &&
+    buf[9] === 0x45 &&
+    buf[10] === 0x42 &&
+    buf[11] === 0x50
+  )
+    return 'webp';
   // HEIC/HEIF: ftyp box at byte 4 with 'heic', 'heix', 'mif1', 'msf1'
   if (buf.length >= 12) {
     const ftyp = String.fromCharCode(buf[4], buf[5], buf[6], buf[7]);
     const brand = String.fromCharCode(buf[8], buf[9], buf[10], buf[11]);
-    if (ftyp === 'ftyp' && (brand === 'heic' || brand === 'heix' || brand === 'mif1' || brand === 'msf1')) return 'heic';
+    if (
+      ftyp === 'ftyp' &&
+      (brand === 'heic' || brand === 'heix' || brand === 'mif1' || brand === 'msf1')
+    )
+      return 'heic';
   }
   return null;
 }
@@ -37,7 +48,10 @@ function stripJpegExif(buf: Uint8Array): Uint8Array {
   while (i < buf.length - 1) {
     if (buf[i] !== 0xff) break;
     const marker = buf[i + 1];
-    if (marker === 0xd9) { out.push(0xff, 0xd9); break; } // EOI
+    if (marker === 0xd9) {
+      out.push(0xff, 0xd9);
+      break;
+    } // EOI
     if (marker === 0xda) {
       // SOS — rest is entropy-coded, copy to end
       for (let j = i; j < buf.length; j++) out.push(buf[j]);

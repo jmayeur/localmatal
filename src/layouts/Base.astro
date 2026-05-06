@@ -11,6 +11,7 @@ const { title, description, ogImage, ogUrl, wide = false } = Astro.props;
 const siteName = 'LocalMatal';
 const currentPath = new URL(Astro.request.url).pathname;
 ---
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -48,8 +49,11 @@ const currentPath = new URL(Astro.request.url).pathname;
     <header class="site-header">
       <a href="/" class="site-logo">{siteName}</a>
       <nav class="site-nav" aria-label="Site navigation">
-        <a href="/gallery" aria-current={currentPath === '/gallery' ? 'page' : undefined}>Gallery</a>
-        <a href="/submit"  aria-current={currentPath === '/submit'  ? 'page' : undefined}>Share a place</a>
+        <a href="/gallery" aria-current={currentPath === '/gallery' ? 'page' : undefined}>Gallery</a
+        >
+        <a href="/submit" aria-current={currentPath === '/submit' ? 'page' : undefined}
+          >Share a place</a
+        >
       </nav>
       <button
         class="theme-toggle"
@@ -75,12 +79,15 @@ const currentPath = new URL(Astro.request.url).pathname;
     <script is:inline>
       (function () {
         var toggle = document.getElementById('theme-toggle');
-        var icon   = document.getElementById('theme-icon');
+        var icon = document.getElementById('theme-icon');
 
         function update() {
           var theme = document.documentElement.getAttribute('data-theme') || 'light';
           icon.textContent = theme === 'dark' ? '☽' : '☀';
-          toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+          toggle.setAttribute(
+            'aria-label',
+            theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme',
+          );
         }
 
         update();

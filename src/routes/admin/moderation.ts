@@ -45,9 +45,7 @@ adminRouter.get('/queue', async (c) => {
     thumb_width: s.thumb_width,
     thumb_height: s.thumb_height,
     submitted_at: s.submitted_at,
-    thumb_url: s.r2_key_prefix
-      ? getImageUrl(c.env, `${s.r2_key_prefix}/thumb.webp`)
-      : null,
+    thumb_url: s.r2_key_prefix ? getImageUrl(c.env, `${s.r2_key_prefix}/thumb.webp`) : null,
   }));
   return c.json({ submissions: items });
 });
@@ -134,7 +132,7 @@ adminRouter.post('/submissions/:id/reject', async (c) => {
   }
 
   const body = await c.req.json<{ reason: string }>();
-  if (!REJECTION_REASONS.includes(body.reason as typeof REJECTION_REASONS[number])) {
+  if (!REJECTION_REASONS.includes(body.reason as (typeof REJECTION_REASONS)[number])) {
     throw new AppError(ErrorCode.INVALID_REASON, 'Invalid rejection reason', 400, 'reason');
   }
 
@@ -222,10 +220,14 @@ adminRouter.delete('/places/:id', async (c) => {
       if (prev && !prev.is_tombstoned) {
         await updateCurrentPlace(c.env.DB, prev.id);
       } else {
-        await c.env.DB.prepare("UPDATE current_place SET place_id = NULL WHERE id = 'singleton'").run();
+        await c.env.DB.prepare(
+          "UPDATE current_place SET place_id = NULL WHERE id = 'singleton'",
+        ).run();
       }
     } else {
-      await c.env.DB.prepare("UPDATE current_place SET place_id = NULL WHERE id = 'singleton'").run();
+      await c.env.DB.prepare(
+        "UPDATE current_place SET place_id = NULL WHERE id = 'singleton'",
+      ).run();
     }
     await invalidateCurrentPlace(c.env.CURRENT_PLACE_CACHE);
   }
@@ -277,12 +279,12 @@ adminRouter.post('/reports/:id/resolve', async (c) => {
   const actor = c.req.header('CF-Access-Authenticated-User-Email') ?? 'admin';
 
   // Get the report to find the place_id
-  const report = await c.env.DB
-    .prepare('SELECT * FROM reports WHERE id = ?')
+  const report = await c.env.DB.prepare('SELECT * FROM reports WHERE id = ?')
     .bind(id)
     .first<{ id: string; place_id: string; resolved_at: string | null }>();
   if (!report) throw new AppError(ErrorCode.NOT_FOUND, 'Report not found', 404);
-  if (report.resolved_at) throw new AppError(ErrorCode.INTERNAL_ERROR, 'Report already resolved', 400);
+  if (report.resolved_at)
+    throw new AppError(ErrorCode.INTERNAL_ERROR, 'Report already resolved', 400);
 
   await resolveReport(c.env.DB, id, action);
 
@@ -299,7 +301,9 @@ adminRouter.post('/reports/:id/resolve', async (c) => {
         if (place.prev_place_id) {
           await updateCurrentPlace(c.env.DB, place.prev_place_id);
         } else {
-          await c.env.DB.prepare("UPDATE current_place SET place_id = NULL WHERE id = 'singleton'").run();
+          await c.env.DB.prepare(
+            "UPDATE current_place SET place_id = NULL WHERE id = 'singleton'",
+          ).run();
         }
         await invalidateCurrentPlace(c.env.CURRENT_PLACE_CACHE);
       }

@@ -5,7 +5,12 @@ import { adminAuthMiddleware } from '../../middleware/adminAuth';
 import { processAndStoreImage, deleteR2Prefix } from '../../lib/imageProcessor';
 import { moveR2Prefix } from '../../lib/r2';
 import { runSafetyChecks } from '../../lib/ai';
-import { insertPlace, updateCurrentPlace, insertAuditLog, getCurrentPlaceFromDb } from '../../lib/db';
+import {
+  insertPlace,
+  updateCurrentPlace,
+  insertAuditLog,
+  getCurrentPlaceFromDb,
+} from '../../lib/db';
 import { fuzzCoordinates } from '../../lib/privacy';
 import { encodeGeohash } from '../../lib/geohash';
 import { generateUlid } from '../../lib/ulid';

@@ -25,6 +25,7 @@ dist/
 _bmad/
 .agents/
 .claude/
+!.claude/commands/
 
 # OS
 .DS_Store

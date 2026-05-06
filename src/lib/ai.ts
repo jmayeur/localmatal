@@ -23,7 +23,10 @@ async function classifyImage(
   // Workers AI image classification expects an array of numbers
   const image = Array.from(imageBytes) as number[];
   const result = await withTimeout(
-    ai.run(modelId as Parameters<Ai['run']>[0], { image } as never) as unknown as Promise<ClassificationResult>,
+    ai.run(
+      modelId as Parameters<Ai['run']>[0],
+      { image } as never,
+    ) as unknown as Promise<ClassificationResult>,
     TIMEOUT_MS,
   );
   if (!result) return null; // timeout treated as unavailable
@@ -64,9 +67,12 @@ export interface EmbeddingResult {
 
 export async function embedText(ai: Ai, text: string): Promise<EmbeddingResult> {
   const result = await withTimeout(
-    ai.run('@cf/baai/bge-small-en-v1.5' as Parameters<Ai['run']>[0], {
-      text: [text],
-    } as never) as Promise<{ data: number[][] }>,
+    ai.run(
+      '@cf/baai/bge-small-en-v1.5' as Parameters<Ai['run']>[0],
+      {
+        text: [text],
+      } as never,
+    ) as Promise<{ data: number[][] }>,
     TIMEOUT_MS,
   );
 
@@ -91,10 +97,13 @@ Sentence B: "${sentenceB}"
 Reply with only "yes" or "no".`;
 
   const result = await withTimeout(
-    ai.run(model as Parameters<Ai['run']>[0], {
-      prompt,
-      max_tokens: 4,
-    } as never) as Promise<{ response: string }>,
+    ai.run(
+      model as Parameters<Ai['run']>[0],
+      {
+        prompt,
+        max_tokens: 4,
+      } as never,
+    ) as Promise<{ response: string }>,
     TIMEOUT_MS,
   );
 

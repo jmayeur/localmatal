@@ -31,8 +31,12 @@ async function verifyAccessJwt(token: string, teamDomain: string): Promise<strin
     const jwk = keys.find((k) => k.kid === header.kid);
     if (!jwk) return null;
 
-    const cryptoKey = await crypto.subtle.importKey('jwk', jwk, importParams(header.alg), false, ['verify']);
-    const sigBytes = Uint8Array.from(atob(sigB64.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+    const cryptoKey = await crypto.subtle.importKey('jwk', jwk, importParams(header.alg), false, [
+      'verify',
+    ]);
+    const sigBytes = Uint8Array.from(atob(sigB64.replace(/-/g, '+').replace(/_/g, '/')), (c) =>
+      c.charCodeAt(0),
+    );
     const data = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
     const valid = await crypto.subtle.verify(verifyParams(header.alg), cryptoKey, sigBytes, data);
 
@@ -73,7 +77,9 @@ export async function getAdminEmail(request: Request, env: Env): Promise<string 
       const decoded = atob(auth.slice(6));
       const password = decoded.split(':').slice(1).join(':');
       if (password === env.ADMIN_SECRET) return 'admin';
-    } catch { /* fall through */ }
+    } catch {
+      /* fall through */
+    }
   }
 
   return null;

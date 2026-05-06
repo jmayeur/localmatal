@@ -30,19 +30,68 @@ const reports = await Promise.all(
 
 <BaseLayout title="Reports — LocalMatal Admin">
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 0 auto; padding: 1rem 1.5rem; }
-    h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
-    .meta { color: #666; font-size: 0.85rem; margin-bottom: 1.5rem; }
-    .report-card { border: 1px solid #ddd; border-radius: 6px; padding: 1rem; margin-bottom: 1rem; }
-    .field { margin-bottom: 0.4rem; font-size: 0.9rem; }
-    .field label { font-size: 0.75rem; color: #666; display: block; }
-    .actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
-    button { padding: 0.4rem 0.75rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
-    .btn-dismiss  { background: #6c757d; color: #fff; }
-    .btn-tombstone { background: #dc3545; color: #fff; }
-    .empty { color: #666; text-align: center; padding: 3rem 0; }
-    nav { margin-bottom: 1.5rem; }
-    nav a { margin-right: 1rem; font-size: 0.9rem; }
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+    }
+    .meta {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .report-card {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .field {
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+    }
+    .field label {
+      font-size: 0.75rem;
+      color: #666;
+      display: block;
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    button {
+      padding: 0.4rem 0.75rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .btn-dismiss {
+      background: #6c757d;
+      color: #fff;
+    }
+    .btn-tombstone {
+      background: #dc3545;
+      color: #fff;
+    }
+    .empty {
+      color: #666;
+      text-align: center;
+      padding: 3rem 0;
+    }
+    nav {
+      margin-bottom: 1.5rem;
+    }
+    nav a {
+      margin-right: 1rem;
+      font-size: 0.9rem;
+    }
   </style>
 
   <main>
@@ -54,37 +103,69 @@ const reports = await Promise.all(
     <h1>Reports</h1>
     <p class="meta">Signed in as {actor}</p>
 
-    {reports.length === 0
-      ? <p class="empty">No unresolved reports.</p>
-      : reports.map((r) => (
-        <article class="report-card" id={`card-${r.id}`}>
-          <div class="field"><label>Place</label><strong>{r.place_name}</strong> (<a href={`/place/${r.place_id}`} target="_blank">{r.place_id}</a>)</div>
-          <div class="field"><label>Sentence</label><em>"{r.place_sentence}"</em></div>
-          <div class="field"><label>Reason</label>{r.reason}</div>
-          <div class="field"><label>Reported</label>{new Date(r.created_at).toLocaleString()}</div>
-          <div class="actions">
-            <button class="btn-dismiss" onclick={`resolve('${r.id}', 'dismissed')`}>Dismiss</button>
-            <button class="btn-tombstone" onclick={`resolve('${r.id}', 'tombstoned')`}>Tombstone place</button>
-          </div>
-        </article>
-      ))
+    {
+      reports.length === 0 ? (
+        <p class="empty">No unresolved reports.</p>
+      ) : (
+        reports.map((r) => (
+          <article class="report-card" id={`card-${r.id}`}>
+            <div class="field">
+              <>
+                <label>Place</label>
+                <strong>{r.place_name}</strong>
+              </>{' '}
+              (
+              <a href={`/place/${r.place_id}`} target="_blank">
+                {r.place_id}
+              </a>
+              )
+            </div>
+            <div class="field">
+              <>
+                <label>Sentence</label>
+                <em>"{r.place_sentence}"</em>
+              </>
+            </div>
+            <div class="field">
+              <label>Reason</label>
+              {r.reason}
+            </div>
+            <div class="field">
+              <label>Reported</label>
+              {new Date(r.created_at).toLocaleString()}
+            </div>
+            <div class="actions">
+              <button class="btn-dismiss" onclick={`resolve('${r.id}', 'dismissed')`}>
+                Dismiss
+              </button>
+              <button class="btn-tombstone" onclick={`resolve('${r.id}', 'tombstoned')`}>
+                Tombstone place
+              </button>
+            </div>
+          </article>
+        ))
+      )
     }
   </main>
 
   <script is:inline>
     /* eslint-disable @typescript-eslint/no-unused-vars */
     async function resolve(id, action) {
-      const confirmed = action === 'tombstoned'
-        ? confirm('This will permanently tombstone the place and delete its images. Continue?')
-        : true;
+      const confirmed =
+        action === 'tombstoned'
+          ? confirm('This will permanently tombstone the place and delete its images. Continue?')
+          : true;
       if (!confirmed) return;
       const r = await fetch(`/api/v1/admin/reports/${id}/resolve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
       });
-      if (r.ok) { document.getElementById('card-' + id)?.remove(); }
-      else { alert('Failed: ' + (await r.json()).error?.message); }
+      if (r.ok) {
+        document.getElementById('card-' + id)?.remove();
+      } else {
+        alert('Failed: ' + (await r.json()).error?.message);
+      }
     }
   </script>
 </BaseLayout>

@@ -7,8 +7,6 @@ import { buildR2Key } from '../lib/r2';
 
 describe('MapIsland types', () => {
   it('r2 key helper produces stable URLs (sanity check)', () => {
-    expect(buildR2Key('approved', '01HWXYZ', 'modal', 'webp')).toBe(
-      'approved/01HWXYZ/modal.webp',
-    );
+    expect(buildR2Key('approved', '01HWXYZ', 'modal', 'webp')).toBe('approved/01HWXYZ/modal.webp');
   });
 });

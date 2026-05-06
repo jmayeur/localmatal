@@ -113,10 +113,7 @@ export async function getCurrentPlaceFromDb(db: D1Database): Promise<Place | nul
 
 // ─── Submissions ──────────────────────────────────────────────────────────────
 
-export async function getSubmissionById(
-  db: D1Database,
-  id: string,
-): Promise<Submission | null> {
+export async function getSubmissionById(db: D1Database, id: string): Promise<Submission | null> {
   const row = await db.prepare('SELECT * FROM submissions WHERE id = ?').bind(id).first();
   return row ? coerceSubmission(row) : null;
 }
@@ -139,7 +136,14 @@ export async function insertAuditLog(
     .prepare(
       'INSERT INTO audit_log (id, action, actor, subject_id, details, created_at) VALUES (?, ?, ?, ?, ?, ?)',
     )
-    .bind(entry.id, entry.action, entry.actor ?? null, entry.subject_id ?? null, entry.details ?? null, created_at)
+    .bind(
+      entry.id,
+      entry.action,
+      entry.actor ?? null,
+      entry.subject_id ?? null,
+      entry.details ?? null,
+      created_at,
+    )
     .run();
 }
 
@@ -194,10 +198,7 @@ export async function updateCurrentPlace(db: D1Database, placeId: string): Promi
 }
 
 export async function tombstonePlace(db: D1Database, placeId: string): Promise<void> {
-  await db
-    .prepare('UPDATE places SET is_tombstoned = 1 WHERE id = ?')
-    .bind(placeId)
-    .run();
+  await db.prepare('UPDATE places SET is_tombstoned = 1 WHERE id = ?').bind(placeId).run();
 }
 
 export async function updateSubmissionStatus(
@@ -219,19 +220,27 @@ export async function updateSubmissionFields(
 ): Promise<void> {
   const sets: string[] = [];
   const vals: unknown[] = [];
-  if (fields.place_name !== undefined) { sets.push('place_name = ?'); vals.push(fields.place_name); }
-  if (fields.contributor_name !== undefined) { sets.push('contributor_name = ?'); vals.push(fields.contributor_name); }
-  if (fields.sentence !== undefined) { sets.push('sentence = ?'); vals.push(fields.sentence); }
+  if (fields.place_name !== undefined) {
+    sets.push('place_name = ?');
+    vals.push(fields.place_name);
+  }
+  if (fields.contributor_name !== undefined) {
+    sets.push('contributor_name = ?');
+    vals.push(fields.contributor_name);
+  }
+  if (fields.sentence !== undefined) {
+    sets.push('sentence = ?');
+    vals.push(fields.sentence);
+  }
   if (sets.length === 0) return;
   vals.push(id);
-  await db.prepare(`UPDATE submissions SET ${sets.join(', ')} WHERE id = ?`).bind(...vals).run();
+  await db
+    .prepare(`UPDATE submissions SET ${sets.join(', ')} WHERE id = ?`)
+    .bind(...vals)
+    .run();
 }
 
-export async function resolveReport(
-  db: D1Database,
-  id: string,
-  resolution: string,
-): Promise<void> {
+export async function resolveReport(db: D1Database, id: string, resolution: string): Promise<void> {
   await db
     .prepare('UPDATE reports SET resolved_at = ?, resolution = ? WHERE id = ?')
     .bind(new Date().toISOString(), resolution, id)

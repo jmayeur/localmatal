@@ -15,29 +15,25 @@ const { placeId } = Astro.props;
     Report this place
   </button>
 
-  <div
-    id={`report-form-${placeId}`}
-    class="report-form"
-    hidden
-  >
+  <div id={`report-form-${placeId}`} class="report-form" hidden>
     <form method="POST" action="/api/v1/reports" data-place-id={placeId}>
       <div
         id={`cf-turnstile-${placeId}`}
         class="cf-turnstile"
         data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '1x00000000000000000000AA'}
-      />
+      >
+      </div>
       <label for={`report-reason-${placeId}`} class="sr-only">Reason (optional)</label>
       <textarea
         id={`report-reason-${placeId}`}
         name="reason"
         placeholder="Reason (optional)"
         maxlength="500"
-        aria-label="Reason for report (optional)"
-      />
+        aria-label="Reason for report (optional)"></textarea>
       <input type="hidden" name="placeId" value={placeId} />
       <button type="submit">Submit report</button>
     </form>
-    <div aria-live="polite" class="sr-only" id={`report-status-${placeId}`} />
+    <div aria-live="polite" class="sr-only" id={`report-status-${placeId}`}></div>
   </div>
 </div>
 

@@ -20,8 +20,8 @@ function proxyUrl(r2Key: string) {
 
 const items = subs.map((s) => ({
   ...s,
-  thumbUrl:  s.r2_key_prefix ? proxyUrl(`${s.r2_key_prefix}/thumb.jpeg`)  : null,
-  fullUrl:   s.r2_key_prefix ? proxyUrl(`${s.r2_key_prefix}/full.jpeg`)   : null,
+  thumbUrl: s.r2_key_prefix ? proxyUrl(`${s.r2_key_prefix}/thumb.jpeg`) : null,
+  fullUrl: s.r2_key_prefix ? proxyUrl(`${s.r2_key_prefix}/full.jpeg`) : null,
 }));
 
 const REJECTION_REASONS = [
@@ -36,36 +36,180 @@ const REJECTION_REASONS = [
 
 <BaseLayout title="Admin Queue — LocalMatal">
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 960px; margin: 0 auto; padding: 1rem 1.5rem; }
-    h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
-    .meta { color: #666; font-size: 0.85rem; margin-bottom: 1.5rem; }
-    .paused-banner { background: #fef3cd; border: 1px solid #d4a017; padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1.5rem; }
-    .queue-card { border: 1px solid #ddd; border-radius: 6px; margin-bottom: 1.5rem; padding: 1rem; display: grid; grid-template-columns: 140px 1fr; gap: 1rem; }
-    .thumb-wrap { position: relative; width: 140px; }
-    .thumb-wrap img { width: 140px; height: 105px; object-fit: cover; border-radius: 4px; display: block; }
-    .thumb-wrap a.full-link { display: block; margin-top: 0.3rem; font-size: 0.75rem; text-align: center; }
-    .no-thumb { width: 140px; height: 105px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.75rem; color: #888; }
-    .field { margin-bottom: 0.4rem; }
-    .field label { font-size: 0.75rem; color: #666; display: block; }
-    .scores { display: flex; gap: 1rem; margin: 0.5rem 0; font-size: 0.8rem; }
-    .flag-warn { background: #fff3cd; padding: 0.25rem 0.5rem; border-radius: 3px; font-weight: 600; font-size: 0.8rem; }
-    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; align-items: flex-end; }
-    .actions button { padding: 0.4rem 0.75rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
-    .btn-approve { background: #198754; color: #fff; }
-    .btn-reject  { background: #dc3545; color: #fff; }
-    .btn-edit    { background: #0d6efd; color: #fff; }
-    select { padding: 0.35rem; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 4px; }
-    .edit-section { display: none; margin-top: 0.75rem; border-top: 1px solid #eee; padding-top: 0.75rem; }
-    .edit-section input, .edit-section textarea { width: 100%; padding: 0.35rem; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-bottom: 0.4rem; }
-    .empty { color: #666; text-align: center; padding: 3rem 0; }
-    nav { margin-bottom: 1.5rem; }
-    nav a { margin-right: 1rem; font-size: 0.9rem; }
-    .seed-section { border: 1px solid #ddd; border-radius: 6px; padding: 1rem; margin-bottom: 2rem; }
-    .seed-section h2 { font-size: 1.1rem; margin-top: 0; }
-    .seed-section input, .seed-section textarea { display: block; width: 100%; padding: 0.35rem; margin-bottom: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-    .seed-section label { font-size: 0.85rem; display: block; margin-bottom: 0.2rem; }
-    .coords { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-    #seed-status { font-size: 0.85rem; margin-top: 0.5rem; }
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+    }
+    .meta {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .paused-banner {
+      background: #fef3cd;
+      border: 1px solid #d4a017;
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      margin-bottom: 1.5rem;
+    }
+    .queue-card {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 1rem;
+    }
+    .thumb-wrap {
+      position: relative;
+      width: 140px;
+    }
+    .thumb-wrap img {
+      width: 140px;
+      height: 105px;
+      object-fit: cover;
+      border-radius: 4px;
+      display: block;
+    }
+    .thumb-wrap a.full-link {
+      display: block;
+      margin-top: 0.3rem;
+      font-size: 0.75rem;
+      text-align: center;
+    }
+    .no-thumb {
+      width: 140px;
+      height: 105px;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: #888;
+    }
+    .field {
+      margin-bottom: 0.4rem;
+    }
+    .field label {
+      font-size: 0.75rem;
+      color: #666;
+      display: block;
+    }
+    .scores {
+      display: flex;
+      gap: 1rem;
+      margin: 0.5rem 0;
+      font-size: 0.8rem;
+    }
+    .flag-warn {
+      background: #fff3cd;
+      padding: 0.25rem 0.5rem;
+      border-radius: 3px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+      align-items: flex-end;
+    }
+    .actions button {
+      padding: 0.4rem 0.75rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .btn-approve {
+      background: #198754;
+      color: #fff;
+    }
+    .btn-reject {
+      background: #dc3545;
+      color: #fff;
+    }
+    .btn-edit {
+      background: #0d6efd;
+      color: #fff;
+    }
+    select {
+      padding: 0.35rem;
+      font-size: 0.85rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .edit-section {
+      display: none;
+      margin-top: 0.75rem;
+      border-top: 1px solid #eee;
+      padding-top: 0.75rem;
+    }
+    .edit-section input,
+    .edit-section textarea {
+      width: 100%;
+      padding: 0.35rem;
+      font-size: 0.85rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      margin-bottom: 0.4rem;
+    }
+    .empty {
+      color: #666;
+      text-align: center;
+      padding: 3rem 0;
+    }
+    nav {
+      margin-bottom: 1.5rem;
+    }
+    nav a {
+      margin-right: 1rem;
+      font-size: 0.9rem;
+    }
+    .seed-section {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+    }
+    .seed-section h2 {
+      font-size: 1.1rem;
+      margin-top: 0;
+    }
+    .seed-section input,
+    .seed-section textarea {
+      display: block;
+      width: 100%;
+      padding: 0.35rem;
+      margin-bottom: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .seed-section label {
+      font-size: 0.85rem;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .coords {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    #seed-status {
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
   </style>
 
   <main>
@@ -77,11 +221,14 @@ const REJECTION_REASONS = [
     <h1>Moderation Queue</h1>
     <p class="meta">Signed in as {actor}</p>
 
-    {paused && (
-      <div class="paused-banner">
-        ⏸ Submissions are currently <strong>paused</strong>. Set <code>SUBMISSIONS_PAUSED = false</code> to resume.
-      </div>
-    )}
+    {
+      paused && (
+        <div class="paused-banner">
+          ⏸ Submissions are currently <strong>paused</strong>. Set{' '}
+          <code>SUBMISSIONS_PAUSED = false</code> to resume.
+        </div>
+      )
+    }
 
     <!-- Seed form -->
     <details class="seed-section">
@@ -100,54 +247,103 @@ const REJECTION_REASONS = [
       </div>
     </details>
 
-    {items.length === 0
-      ? <p class="empty">Queue is clear.</p>
-      : items.map((s) => (
-        <article class="queue-card" id={`card-${s.id}`}>
-          <div class="thumb-wrap">
-            {s.thumbUrl
-              ? <>
+    {
+      items.length === 0 ? (
+        <p class="empty">Queue is clear.</p>
+      ) : (
+        items.map((s) => (
+          <article class="queue-card" id={`card-${s.id}`}>
+            <div class="thumb-wrap">
+              {s.thumbUrl ? (
+                <>
                   <img src={s.thumbUrl} alt={s.sentence} loading="lazy" />
-                  {s.fullUrl && <a class="full-link" href={s.fullUrl} target="_blank" rel="noopener">View full image ↗</a>}
+                  {s.fullUrl && (
+                    <a class="full-link" href={s.fullUrl} target="_blank" rel="noopener">
+                      View full image ↗
+                    </a>
+                  )}
                 </>
-              : <div class="no-thumb">No image</div>}
-          </div>
-          <div>
-            <div class="field"><label>Place</label><strong>{s.place_name}</strong></div>
-            <div class="field"><label>Contributor</label>{s.contributor_name}</div>
-            <div class="field"><label>Sentence</label><em>"{s.sentence}"</em></div>
-            <div class="scores">
-              <span>Face: {s.face_score != null ? s.face_score.toFixed(2) : '–'}</span>
-              <span>NSFW: {s.nsfw_score != null ? s.nsfw_score.toFixed(2) : '–'}</span>
-              <span>Overlap: {s.overlap_score != null ? s.overlap_score.toFixed(2) : '–'}</span>
-              {(s.overlap_degraded) && <span>⚠ overlap degraded</span>}
+              ) : (
+                <div class="no-thumb">No image</div>
+              )}
             </div>
-            {s.ai_flags_unavailable && <div class="flag-warn">⚠ AI unavailable — manual review required</div>}
+            <div>
+              <div class="field">
+                <>
+                  <label>Place</label>
+                  <strong>{s.place_name}</strong>
+                </>
+              </div>
+              <div class="field">
+                <label>Contributor</label>
+                {s.contributor_name}
+              </div>
+              <div class="field">
+                <>
+                  <label>Sentence</label>
+                  <em>"{s.sentence}"</em>
+                </>
+              </div>
+              <div class="scores">
+                <span>Face: {s.face_score != null ? s.face_score.toFixed(2) : '–'}</span>
+                <span>NSFW: {s.nsfw_score != null ? s.nsfw_score.toFixed(2) : '–'}</span>
+                <span>Overlap: {s.overlap_score != null ? s.overlap_score.toFixed(2) : '–'}</span>
+                {s.overlap_degraded && <span>⚠ overlap degraded</span>}
+              </div>
+              {s.ai_flags_unavailable && (
+                <div class="flag-warn">⚠ AI unavailable — manual review required</div>
+              )}
 
-            <div class="actions">
-              <button class="btn-approve" onclick={`approve('${s.id}')`}>Approve</button>
-              <select id={`reason-${s.id}`}>
-                {REJECTION_REASONS.map(r => <option value={r}>{r}</option>)}
-              </select>
-              <button class="btn-reject" onclick={`reject('${s.id}')`}>Reject</button>
-              <button class="btn-edit" onclick={`toggleEdit('${s.id}')`}>Edit</button>
-            </div>
+              <div class="actions">
+                <button class="btn-approve" onclick={`approve('${s.id}')`}>
+                  Approve
+                </button>
+                <select id={`reason-${s.id}`}>
+                  {REJECTION_REASONS.map((r) => (
+                    <option value={r}>{r}</option>
+                  ))}
+                </select>
+                <button class="btn-reject" onclick={`reject('${s.id}')`}>
+                  Reject
+                </button>
+                <button class="btn-edit" onclick={`toggleEdit('${s.id}')`}>
+                  Edit
+                </button>
+              </div>
 
-            <div class="edit-section" id={`edit-${s.id}`}>
-              <label>Place name
-                <input type="text" id={`edit-place_name-${s.id}`} value={s.place_name} maxlength="100" />
-              </label>
-              <label>Contributor name
-                <input type="text" id={`edit-contributor_name-${s.id}`} value={s.contributor_name} maxlength="80" />
-              </label>
-              <label>Sentence
-                <textarea id={`edit-sentence-${s.id}`} rows="2" maxlength="250">{s.sentence}</textarea>
-              </label>
-              <button class="btn-edit" onclick={`saveEdit('${s.id}')`}>Save edits</button>
+              <div class="edit-section" id={`edit-${s.id}`}>
+                <label>
+                  Place name
+                  <input
+                    type="text"
+                    id={`edit-place_name-${s.id}`}
+                    value={s.place_name}
+                    maxlength="100"
+                  />
+                </label>
+                <label>
+                  Contributor name
+                  <input
+                    type="text"
+                    id={`edit-contributor_name-${s.id}`}
+                    value={s.contributor_name}
+                    maxlength="80"
+                  />
+                </label>
+                <label>
+                  Sentence
+                  <textarea id={`edit-sentence-${s.id}`} rows="2" maxlength="250">
+                    {s.sentence}
+                  </textarea>
+                </label>
+                <button class="btn-edit" onclick={`saveEdit('${s.id}')`}>
+                  Save edits
+                </button>
+              </div>
             </div>
-          </div>
-        </article>
-      ))
+          </article>
+        ))
+      )
     }
   </main>
 
@@ -164,15 +360,21 @@ const REJECTION_REASONS = [
 
     async function approve(id) {
       const r = await apiPost(`/api/v1/admin/submissions/${id}/approve`, {});
-      if (r.ok) { document.getElementById('card-' + id)?.remove(); }
-      else { alert('Approve failed: ' + (await r.json()).error?.message); }
+      if (r.ok) {
+        document.getElementById('card-' + id)?.remove();
+      } else {
+        alert('Approve failed: ' + (await r.json()).error?.message);
+      }
     }
 
     async function reject(id) {
       const reason = document.getElementById('reason-' + id)?.value;
       const r = await apiPost(`/api/v1/admin/submissions/${id}/reject`, { reason });
-      if (r.ok) { document.getElementById('card-' + id)?.remove(); }
-      else { alert('Reject failed: ' + (await r.json()).error?.message); }
+      if (r.ok) {
+        document.getElementById('card-' + id)?.remove();
+      } else {
+        alert('Reject failed: ' + (await r.json()).error?.message);
+      }
     }
 
     function toggleEdit(id) {
@@ -189,8 +391,12 @@ const REJECTION_REASONS = [
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ place_name, contributor_name, sentence }),
       });
-      if (r.ok) { alert('Saved. Refresh to see updated values.'); toggleEdit(id); }
-      else { alert('Save failed: ' + (await r.json()).error?.message); }
+      if (r.ok) {
+        alert('Saved. Refresh to see updated values.');
+        toggleEdit(id);
+      } else {
+        alert('Save failed: ' + (await r.json()).error?.message);
+      }
     }
 
     async function seedChain() {

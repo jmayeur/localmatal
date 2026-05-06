@@ -27,7 +27,9 @@ function getDistanceUnit(): 'km' | 'mi' {
     // Fall back to likely-subtag expansion on the base language
     const region = new Intl.Locale(navigator.language).maximize().region;
     if (region) return IMPERIAL.has(region) ? 'mi' : 'km';
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return 'km';
 }
 
@@ -41,19 +43,21 @@ let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 export default function MapIsland({ mode, lat, lng, fuzzed = false, onChange }: MapIslandProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef    = useRef<import('leaflet').Map    | null>(null);
+  const mapRef = useRef<import('leaflet').Map | null>(null);
   const markerRef = useRef<import('leaflet').Marker | null>(null);
 
-  const [inputLat,   setInputLat]   = useState(lat.toFixed(6));
-  const [inputLng,   setInputLng]   = useState(lng.toFixed(6));
-  const [query,      setQuery]      = useState('');
-  const [results,    setResults]    = useState<SearchResult[]>([]);
-  const [searching,  setSearching]  = useState(false);
-  const [distUnit,   setDistUnit]   = useState<'km' | 'mi'>('km');
+  const [inputLat, setInputLat] = useState(lat.toFixed(6));
+  const [inputLng, setInputLng] = useState(lng.toFixed(6));
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [distUnit, setDistUnit] = useState<'km' | 'mi'>('km');
   const searchRef = useRef<HTMLDivElement>(null);
 
   // Detect locale-based unit on mount
-  useEffect(() => { setDistUnit(getDistanceUnit()); }, []);
+  useEffect(() => {
+    setDistUnit(getDistanceUnit());
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -125,14 +129,14 @@ export default function MapIsland({ mode, lat, lng, fuzzed = false, onChange }: 
         });
       }
 
-      mapRef.current    = map;
+      mapRef.current = map;
       markerRef.current = marker;
 
       // If no location was pre-filled (EXIF or previous input), pan to IP geolocation
       if (mode === 'picker' && isDefaultCenter) {
         fetch('/api/v1/geo')
-          .then(r => r.ok ? r.json<{ lat: number | null; lng: number | null }>() : null)
-          .then(data => {
+          .then((r) => (r.ok ? r.json<{ lat: number | null; lng: number | null }>() : null))
+          .then((data) => {
             if (data?.lat != null && data?.lng != null && mapRef.current) {
               mapRef.current.setView([data.lat, data.lng], 10);
             }
@@ -143,7 +147,7 @@ export default function MapIsland({ mode, lat, lng, fuzzed = false, onChange }: 
 
     return () => {
       mapRef.current?.remove();
-      mapRef.current  = null;
+      mapRef.current = null;
       markerRef.current = null;
     };
   }, []);
@@ -165,7 +169,10 @@ export default function MapIsland({ mode, lat, lng, fuzzed = false, onChange }: 
 
   // Geocoding search (Nominatim)
   const runSearch = useCallback((q: string) => {
-    if (q.trim().length < 3) { setResults([]); return; }
+    if (q.trim().length < 3) {
+      setResults([]);
+      return;
+    }
     if (searchTimeout) clearTimeout(searchTimeout);
     searchTimeout = setTimeout(async () => {
       setSearching(true);
@@ -222,7 +229,10 @@ export default function MapIsland({ mode, lat, lng, fuzzed = false, onChange }: 
             autoComplete="off"
           />
           {searching && (
-            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.75rem;color:var(--text-muted)" aria-live="polite">
+            <span
+              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.75rem;color:var(--text-muted)"
+              aria-live="polite"
+            >
               Searching…
             </span>
           )}
@@ -268,7 +278,9 @@ export default function MapIsland({ mode, lat, lng, fuzzed = false, onChange }: 
         <>
           <div class="map-coords" role="group" aria-label="Manual coordinate entry">
             <div class="form-group" style="margin:0">
-              <label class="form-label" for="map-lat">Latitude</label>
+              <label class="form-label" for="map-lat">
+                Latitude
+              </label>
               <input
                 id="map-lat"
                 type="number"
@@ -281,7 +293,9 @@ export default function MapIsland({ mode, lat, lng, fuzzed = false, onChange }: 
               />
             </div>
             <div class="form-group" style="margin:0">
-              <label class="form-label" for="map-lng">Longitude</label>
+              <label class="form-label" for="map-lng">
+                Longitude
+              </label>
               <input
                 id="map-lng"
                 type="number"

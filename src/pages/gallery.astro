@@ -13,47 +13,51 @@ const places = await getApprovedPlaces(env.DB);
 <Base title="Gallery — LocalMatal" description="Every place loved so far." wide>
   <h1>All places</h1>
 
-  {places.length === 0 ? (
-    <p style="margin-top: 2rem; color: var(--text-muted);">No places yet. Be the first to add one.</p>
-  ) : (
-    <div class="gallery-grid">
-      {places.map((place) => {
-        const origin = Astro.url.origin;
-        const thumbUrl = place.r2_key_prefix
-          ? getImageUrl(env, buildR2Key('approved', place.id, 'thumb', 'jpeg'), origin)
-          : null;
-        const modalUrl = place.r2_key_prefix
-          ? getImageUrl(env, buildR2Key('approved', place.id, 'modal', 'jpeg'), origin)
-          : null;
+  {
+    places.length === 0 ? (
+      <p style="margin-top: 2rem; color: var(--text-muted);">
+        No places yet. Be the first to add one.
+      </p>
+    ) : (
+      <div class="gallery-grid">
+        {places.map((place) => {
+          const origin = Astro.url.origin;
+          const thumbUrl = place.r2_key_prefix
+            ? getImageUrl(env, buildR2Key('approved', place.id, 'thumb', 'jpeg'), origin)
+            : null;
+          const modalUrl = place.r2_key_prefix
+            ? getImageUrl(env, buildR2Key('approved', place.id, 'modal', 'jpeg'), origin)
+            : null;
 
-        return (
-          <a
-            href={`/place/${place.id}`}
-            class="gallery-thumb"
-            data-place-id={modalUrl ? place.id : undefined}
-            data-place-name={modalUrl ? place.place_name : undefined}
-            data-contributor={modalUrl ? place.contributor_name : undefined}
-            data-sentence={modalUrl ? place.sentence : undefined}
-            data-lat={modalUrl ? place.lat : undefined}
-            data-lng={modalUrl ? place.lng : undefined}
-            data-modal-url={modalUrl ?? undefined}
-          >
-            {thumbUrl ? (
-              <img
-                src={thumbUrl}
-                alt={place.sentence}
-                width={place.thumb_width ?? undefined}
-                height={place.thumb_height ?? undefined}
-                loading="lazy"
-              />
-            ) : (
-              <span class="sr-only">{place.place_name}</span>
-            )}
-          </a>
-        );
-      })}
-    </div>
-  )}
+          return (
+            <a
+              href={`/place/${place.id}`}
+              class="gallery-thumb"
+              data-place-id={modalUrl ? place.id : undefined}
+              data-place-name={modalUrl ? place.place_name : undefined}
+              data-contributor={modalUrl ? place.contributor_name : undefined}
+              data-sentence={modalUrl ? place.sentence : undefined}
+              data-lat={modalUrl ? place.lat : undefined}
+              data-lng={modalUrl ? place.lng : undefined}
+              data-modal-url={modalUrl ?? undefined}
+            >
+              {thumbUrl ? (
+                <img
+                  src={thumbUrl}
+                  alt={place.sentence}
+                  width={place.thumb_width ?? undefined}
+                  height={place.thumb_height ?? undefined}
+                  loading="lazy"
+                />
+              ) : (
+                <span class="sr-only">{place.place_name}</span>
+              )}
+            </a>
+          );
+        })}
+      </div>
+    )
+  }
 
   <GalleryModal client:load />
 </Base>
