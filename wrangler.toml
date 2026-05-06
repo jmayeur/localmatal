@@ -42,7 +42,7 @@ OVERLAP_THRESHOLD = "0.65"
 OVERLAP_LLM_THRESHOLD = "0.50"
 DIGEST_THRESHOLD = "5"
 IMAGES_BASE_URL = "https://images.localmatal.com"
-CF_TEAM_DOMAIN = "localmatal"
+CF_TEAM_DOMAIN = "jmayeur"
 
 # ── Preview environment (isolated DB + bucket) ──────────────────────────────
 [env.preview]
