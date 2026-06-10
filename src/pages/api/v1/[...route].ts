@@ -5,6 +5,7 @@ import { env } from 'cloudflare:workers';
 import type { APIRoute } from 'astro';
 import { reportsRouter } from '../../../routes/reports';
 import { submissionsRouter } from '../../../routes/submissions';
+import { placesRouter } from '../../../routes/places';
 import { adminRouter } from '../../../routes/admin/moderation';
 import { seedRouter } from '../../../routes/admin/seed';
 import { AppError } from '../../../lib/errors';
@@ -25,6 +26,7 @@ app.onError((err, c) => {
   );
 });
 
+app.route('/places', placesRouter);
 app.route('/reports', reportsRouter);
 app.route('/submissions', submissionsRouter);
 app.route('/admin', adminRouter);
