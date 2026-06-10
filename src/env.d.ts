@@ -43,4 +43,5 @@ interface Env {
   IP_HASH_SALT: string;
   ADMIN_SECRET: string;
   CF_TEAM_DOMAIN: string;
+  MOBILE_API_KEY: string;
 }
